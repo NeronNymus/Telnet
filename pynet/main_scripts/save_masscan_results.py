@@ -3,7 +3,7 @@
 # This code serves for importing the masscan results into the PosgreSQL database.
 # [!] Parent directory must be pynet.
 # Example execution of this script:
-# python3 main_scripts/save_masscan_results.py -iL /home/grimaldi/Bash/Telnet/scans/crawling/ips_up_port_23_10.0.0.0_8/ips_up_port_23_10.0.0.0_8.2 -t 20
+# python3 main_scripts/save_masscan_results.py -iL $default_path/scans/crawling/ips_up_port_23_10.0.0.0_8/ips_up_port_23_10.0.0.0_8.1 -t 20
 
 import re
 import os
@@ -44,7 +44,6 @@ def process_bulk_files():
 
     # Path to the directory containing 
     scans_dir = os.path.abspath(parent_dir2 + "/scans/crawling/ips_up_port_23_10.0.0.0_8")
-    scans_dir = "/home/grimaldi/Bash/Telnet/scans/crawling/ips_up_port_23_10.0.0.0_8"
 
     files_list = list()
 
