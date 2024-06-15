@@ -7,7 +7,8 @@ masscan_background(){
 	ranges="$2"
 	port_number="$3"
 	rate="$4"
-	parent_path="/home/$user/Bash/Telnet"
+	#parent_path="/home/$user/Bash/Telnet"
+	parent_path="$default_path"
 	scans_path="$parent_path/scans"
 	logs_path="$scans_path/logs"
 
