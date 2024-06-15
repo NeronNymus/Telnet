@@ -30,6 +30,14 @@ from etl.etl_masscan import process_masscan_result, process_masscan_result_line
 # Start a pool for connections to the backend
 threads = 10 # default value
 
+# Database connection parameters using environment variables
+#DB_HOST = os.getenv('DB_HOST')
+#DB_NAME = os.getenv('DB_NAME')
+#DB_USER = os.getenv('DB_USER')
+#DB_PASSWORD = os.getenv('DB_PASSWORD')
+#DB_PORT = os.getenv('DB_PORT')
+
+
 # Function to parse command-line arguments
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Script for loading the masscan results into the database.")

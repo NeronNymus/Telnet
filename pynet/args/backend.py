@@ -18,6 +18,8 @@ DB_PORT = os.getenv('DB_PORT')
 
 # Initialize the connection pool
 def start_pool(min_connections, max_connections):
+    global DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
+
     connection_pool = psycopg2.pool.SimpleConnectionPool(
         min_connections,  # minimum number of connections
         max_connections,  # maximum number of connections
