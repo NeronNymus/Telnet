@@ -6,7 +6,8 @@
 
 # Is it necessary to execute the quetzal.sh inside the root path of this project.
 # Other option is to modify the default path where is located the project.
-default_path="/home/grimaldi/Bash/Telnet"
+user=$(whoami)
+default_path="/home/$user/Bash/Telnet"
 #default_path=$(pwd)
 
 # Include function files
