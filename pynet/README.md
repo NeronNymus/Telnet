@@ -2,4 +2,5 @@
 
 You need to execute this script for creating the virtual environment.
 
+chmod +x create_virtualenv.sh
 ./create_virtualenv.sh
