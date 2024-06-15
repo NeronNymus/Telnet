@@ -129,12 +129,12 @@ EOF
 
 import_masscan_results(){
 
-	default_path=$(pwd)
+	default_path_pynet="$default_path/pynet"
 	output_path="$1"
 	threads="$2"
 	
 	# Setup the python environment
-	cd "$default_path/pynet"
+	cd "$default_path_pynet"
 	source "telEnv/bin/activate"
 
 	python3 main_scripts/save_masscan_results.py -iL "$output_path" -t "$threads"
