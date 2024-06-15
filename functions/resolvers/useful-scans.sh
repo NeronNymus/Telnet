@@ -134,8 +134,8 @@ import_masscan_results(){
 	threads="$2"
 	
 	# Setup the python environment
-	cd "$default_path_pynet"
-	source "telEnv/bin/activate"
+	cd "$default_path_pynet" || return 1
+	source "telEnv/bin/activate" || return 1
 
 	python3 main_scripts/save_masscan_results.py -iL "$output_path" -t "$threads"
 
