@@ -138,11 +138,8 @@ import_masscan_results(){
 	source "telEnv/bin/activate" || return 1
 	source "exports.sh"
 
+	printf "\n[!] Loading results into the database."
 	python3 main_scripts/save_masscan_results.py -iL "$output_path" -t "$threads"
-
-	echo
-	pwd
-	echo "python3 main_scripts/save_masscan_results.py -iL $output_path -t $threads"
 
 	deactivate
 	
