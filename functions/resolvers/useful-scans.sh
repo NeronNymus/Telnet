@@ -139,6 +139,10 @@ import_masscan_results(){
 
 	python3 main_scripts/save_masscan_results.py -iL "$output_path" -t "$threads"
 
+	echo
+	pwd
+	echo "python3 main_scripts/save_masscan_results.py -iL $output_path -t $threads"
+
 	deactivate
 	
 }
