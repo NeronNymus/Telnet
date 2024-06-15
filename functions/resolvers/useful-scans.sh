@@ -9,7 +9,7 @@ masscan_background(){
 	scans_path="$default_path/scans"
 	logs_path="$scans_path/logs"
 
-	[ ! -d "$scans_path" ] && mkdir -p "$scans_path"
+	[ ! -d "$scans_path/crawling" ] && mkdir -p "$scans_path"
 	[ ! -d "$logs_path" ] && mkdir -p "$logs_path"
 
 	modified_ranges="${ranges//\//_}" # Substitute / with _
