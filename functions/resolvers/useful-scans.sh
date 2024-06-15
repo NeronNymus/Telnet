@@ -1,21 +1,21 @@
 #!/bin/bash
 
 masscan_background(){
-	grayColor="\e[0;31m\033[1m"
 
 	threads="$1"
 	ranges="$2"
 	port_number="$3"
 	rate="$4"
-	#parent_path="/home/$user/Bash/Telnet"
-	parent_path="$default_path"
-	scans_path="$parent_path/scans"
+	scans_path="$default_path/scans"
 	logs_path="$scans_path/logs"
+
+	[ ! -d "$scans_path" ] && mkdir -p "$scans_path"
+	[ ! -d "$logs_path" ] && mkdir -p "$logs_path"
 
 	modified_ranges="${ranges//\//_}" # Substitute / with _
 	modified_ranges="${modified_ranges//,/-}" # Substitute , with _
 
-	cd "$parent_path" || return 1
+	cd "$default_path" || return 1
 	start_cronometer
 
 
@@ -142,6 +142,3 @@ import_masscan_results(){
 	deactivate
 	
 }
-
-
-
