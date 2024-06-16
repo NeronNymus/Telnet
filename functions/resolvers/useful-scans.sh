@@ -85,7 +85,7 @@ EOF
 
 
 
-	if [ "$threads" -eq "1" ]; then
+	if [ "$threads" = '1/1' ]; then
 		printf "\n${grayColour}[!] Executed command:\n${endColour}"
 		echo -e "\nsudo masscan -c $conf -oG $output_path | tee ${logs_path}/${mass_log}.log 2>${logs_path}/${mass_log}_errors.log"
 		echo
@@ -97,16 +97,19 @@ EOF
 		printf "\n${grayColour}[!] Running masscan on port $port_number in the background:${endColour}\n\n"
 		sudo masscan -c "$conf" -oG "$output_path" | tee "${logs_path}/${mass_log}.log" 2>"${logs_path}/${mass_log}_errors.log"
 	else
-		echo "This part is in develop process... Use '-t 1' instead."
 		printf "\n${grayColour}[!] Configuration file: %s${endColour}\n" "$conf"
 		cat "$conf"
 		printf "\n\n${grayColour}[!] Commands executed in parallel:${endColour}\n"
 
-		for i in $(seq 1 "$threads"); do
-			echo -e "\nsudo masscan -c $conf --shard $i/$threads -oG $output_path.$i 1>${logs_path}/${mass_log}.${i}.log 2>${logs_path}/${mass_log}.${i}_errors.log"
+		numerator=$(echo "$threads" | cut -d '/' -f1)
+		denominator=$(echo "$threads" | cut -d '/' -f2)
+		output_path="${output_path}_${numerator}_${denominator}"
 
-			#sudo masscan -c "$conf" --shard "$i/$threads" -oG "$output_path.$i" 1>"${logs_path}/${mass_log}.${i}.log" 2>"${logs_path}/${mass_log}.${i}_errors.log" &
-		done
+		#echo -e "\nsudo masscan -c $conf --shard $threads -oG ${output_path} 1>${logs_path}/${mass_log}.log 2>${logs_path}/${mass_log}_errors.log"
+		echo -e "\nsudo masscan -c $conf --shard $threads -oG ${output_path}"
+
+		touch "${output_path}_${numerator}_${denominator}"
+		sudo masscan -c "$conf" --shard "$threads" -oG "${output_path}"
 
 	fi
 
@@ -138,7 +141,7 @@ import_masscan_results(){
 	source "telEnv/bin/activate" || return 1
 	source "exports.sh"
 
-	printf "\n[!] Loading results into the database."
+	printf "\n[!] Loading results into the database.\n"
 	python3 main_scripts/save_masscan_results.py -iL "$output_path" -t "$threads"
 
 	deactivate

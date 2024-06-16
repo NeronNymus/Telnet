@@ -25,8 +25,8 @@ helpPanel(){
 	echo -e "\t [1] ${turquoiseColour}./Telnet.sh${endColour}${orangeColour} -i ${endColour}${greenColour}victims${endColour}${orangeColour} -t ${endColour}10${orangeColour} --ifconfig${endColour}"
 	echo -e "\t [2] ${turquoiseColour}./Telnet.sh${endColour}${orangeColour} -i ${endColour}${greenColour}victims${endColour}${orangeColour} -t ${endColour}10${orangeColour} --login${endColour}"
 	echo -e "\t [3] ${turquoiseColour}./Telnet.sh${endColour}${orangeColour} -i ${endColour}${greenColour}victims${endColour}${orangeColour} -t ${endColour}10${orangeColour} --ping${endColour}"
-	echo -e "\t [4] ${turquoiseColour}sudo ./Telnet.sh${endColour}${orangeColour} -r ${endColour}${greenColour}10.0.0.0/8${endColour}${orangeColour} -p ${endColour}23${orangeColour} -t ${endColour}10${orangeColour} -m${endColour}${orangeColour} -e ${endColour}scans/excluded_ranges"
-	echo -e "\t [5] ${turquoiseColour}sudo ./Telnet.sh${endColour}${orangeColour} -r ${endColour}${greenColour}10.0.0.0/8${endColour}${orangeColour} -p ${endColour}23${orangeColour} -t ${endColour}1${orangeColour} -s ${endColour}100${orangeColour} -m${endColour}"
+	echo -e "\t [4] ${turquoiseColour}sudo ./Telnet.sh${endColour}${orangeColour} -r ${endColour}${greenColour}10.0.0.0/8${endColour}${orangeColour} -p ${endColour}23${orangeColour} -t ${endColour}'1/10'${orangeColour} -m${endColour}${orangeColour} -e ${endColour}scans/excluded_ranges"
+	echo -e "\t [5] ${turquoiseColour}sudo ./Telnet.sh${endColour}${orangeColour} -r ${endColour}${greenColour}10.0.0.0/8${endColour}${orangeColour} -p ${endColour}23${orangeColour} -t ${endColour}'1/1'${orangeColour} -s ${endColour}100${orangeColour} -m${endColour}"
 	echo -e "\t [6] ${turquoiseColour}./Telnet.sh${endColour}${orangeColour} -i ${endColour}${greenColour}victims${endColour}${orangeColour} -t ${endColour}10${orangeColour} --trace${endColour}"
 	echo -e "\t [7] ${turquoiseColour}./Telnet.sh${endColour}${orangeColour} -i ${endColour}${greenColour}victims${endColour}${orangeColour} -t ${endColour}10${orangeColour} --javat${endColour}"
 
@@ -34,8 +34,8 @@ helpPanel(){
 	echo -e "\t [1]\t${turquoiseColour} This command discover hosts up using ping in parallel.${endColour}"
 	echo -e "\t [2]\t${turquoiseColour} This command try to log with each IP in 10 telnet threads connections.${endColour}"
 	echo -e "\t [3]\t${turquoiseColour} This command execute 'ifconfig' in 10 telnet threads connections.${endColour}"
-	echo -e "\t [4]\t${turquoiseColour} This command discover active telnet hosts using masscan in provided parallel threads.${endColour}"
-	echo -e "\t [5]\t${turquoiseColour} This command discover active telnet hosts using masscan in provided parallel threads specifying the rate of masscan.${endColour}"
+	echo -e "\t [4]\t${turquoiseColour} This command discover active telnet hosts using masscan subdiving with shards.${endColour}"
+	echo -e "\t [5]\t${turquoiseColour} This command discover active telnet hosts using masscan subdiving in shards, specifying the rate of masscan.${endColour}"
 	echo -e "\t [6]\t${turquoiseColour} This command discover and trace the hops of the provided list of IP's.${endColour}"
 	echo -e "\t [7]\t${turquoiseColour} This command try to log with each IP in 10 telnet threads connections, similar to example [2], but using Java.${endColour}"
 	exit 0

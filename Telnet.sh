@@ -26,6 +26,7 @@ RATE="1000"
 excluded_ranges="$default_path/scans/excluded_ranges"
 max_xterms_top=1000
 max_xterms=1
+shard='1/1'
 [ -e "$IPs_PATH" ] && lines_global=$(wc -l < "$IPs_PATH")
 
 
@@ -58,7 +59,9 @@ while true; do
             shift 2
             ;;
         -t|--threads)
-			max_xterms="$2"
+			shard="$2"
+			max_xterms=$(echo "$shard" | cut -d '/' -f2)
+
 			[ "$max_xterms" -gt "$max_xterms_top" ] && printf "[#] Max number of threads %s exceed." "$max_xterms_top" && exit 1
 			[ "$max_xterms" -lt "0" ] && printf "[#] Max number of threads %s is less than 0." "$max_xterms_top" && exit 1
 			printf "\n${grayColour}[!] Threads: %s${endColour}\n" "$max_xterms"
@@ -99,7 +102,7 @@ while true; do
         -m|--masscan)
 			#printf "\n[!] Running masscan on port 23 in the background\n\n"
 			[ -z "$RANGES" ] && echo -e "${redColour}[#] Setup the IP ranges correctly.${endColour}" && exit 1
-			masscan_background "$max_xterms" "$RANGES" "$PORT" "$RATE"
+			masscan_background "$shard" "$RANGES" "$PORT" "$RATE"
 
             counter=$((counter + 1))
             shift 1
