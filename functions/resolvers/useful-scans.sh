@@ -109,6 +109,7 @@ EOF
 		echo -e "\nsudo masscan -c $conf --shard $threads -oG ${output_path}"
 
 		touch "${output_path}_${numerator}_${denominator}"
+		echo
 		sudo masscan -c "$conf" --shard "$threads" -oG "${output_path}"
 
 	fi
