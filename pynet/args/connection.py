@@ -10,14 +10,13 @@ from datetime import datetime
 # Personal packages
 from utils.colors import Colors
 
-
 conn_timeout = 15
-
 
 def connect_to_ip(conn, source_ip, ip_address, username, password, port):
     print(Colors.BOLD_WHITE + f"\n[!] Trying to connect with the next details: \n"
-          f"Port: {port} \n"
-          f"IP:\t{ip_address} \n" + Colors.R)
+          f"Port:\t{port} \n"
+          f"IP:\t{ip_address} \n" + 
+          f"-------------------------------------------------------------------------" + Colors.R)
 
     # Record the start time before attempting the connection
     start_time = datetime.now()
@@ -37,18 +36,18 @@ def connect_to_ip(conn, source_ip, ip_address, username, password, port):
 
         # Calculate the elapsed time
         elapsed_time = datetime.now() - start_time
-        print(Colors.ORANGE + f"Elapsed time: {elapsed_time}" + Colors.R)
+        print(Colors.ORANGE + f"[!] Elapsed time: {elapsed_time}" + Colors.R)
 
         insert_connection_status(conn, source_ip, ip_address, elapsed_time, 'Success')
 
         return tn  # Return the telnet object for further use
 
     except Exception as e:
-        print(Colors.RED + f"Connection error: \n{e}" + Colors.R)
+        print(Colors.RED + f"[#] Connection error: \n{e}" + Colors.R)
 
         # Calculate the elapsed time even in case of connection error
         elapsed_time = datetime.now() - start_time
-        print(f"Elapsed time: {elapsed_time}")
+        print(f"[!] Elapsed time: {elapsed_time}")
 
         #insert_connection_status(conn, source_ip, ip_address, elapsed_time, 'Timeout')
         insert_connection_status(conn, source_ip, ip_address, elapsed_time, str(e))
