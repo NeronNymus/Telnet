@@ -127,7 +127,8 @@ EOF
 	#grep open "$out_path_template"* | cut -d ' ' -f3 | sort -V > "${output_path}.join"
 	#sort -V -u -o "$output_path.join" "$output_path.join"
 
-	import_masscan_results "$output_path" 10
+	# This line is for importing the results into the PostgreSQL database
+	#import_masscan_results "$output_path" 10
 
 }
 
