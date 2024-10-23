@@ -105,8 +105,8 @@ def split_file(input_path, number):
 # Call a single pynet
 def call_pynet(ip_file, port, victim):
     global pynet2_executable
-    #os.system(f"python3 {pynet2_executable} -iL {ip_file} -p {port} -l -v {victim}")
-    os.system(f"python3 {pynet2_executable} -iL {ip_file} -p {port} -l -v {victim}")
+    #os.system(f"python {pynet2_executable} -iL {ip_file} -p {port} -l -v {victim}")
+    os.system(f"python {pynet2_executable} -iL {ip_file} -p {port} -l -v {victim}")
 
 
 # Call the multiprocessing method for parallelizing
