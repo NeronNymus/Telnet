@@ -123,7 +123,7 @@ def main():
 
     # Check path exist
     if not os.path.exists(args.ip_list):
-        print(f"[!] Path doesn't exist:  {input_path}")
+        print(f"[!] Path doesn't exist:  {args.ip_list}")
         sys.exit(0)
 
     # Split provided file
