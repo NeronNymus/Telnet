@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-# This script splits a large IP list and 
-# create processes for running pynet2 script
-# with smaller lists, parallelizing the execution.
+# This script splits a large bulk of xmls
+# for processing it in parallel
 
 import os
 import sys
@@ -14,7 +13,7 @@ from multiprocessing import Process
 # Global list
 processes = []
 splitted_files = []
-number_processes = 4    # default value
+number_processes = 8    # default value
 pynet2_executable = os.getcwd() + "/pynet2.py"
 
 def exit_gracefully():

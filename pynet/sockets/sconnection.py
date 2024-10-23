@@ -5,6 +5,7 @@
 # Save logs and analyze output for creation of more command sequences.
 
 import sys
+import csv
 import time
 import socket
 from datetime import datetime
@@ -76,6 +77,8 @@ def telnet_auth_sequence(remote_host, remote_port, log_output=None, max_retries=
         response = response.decode('latin')
 
     if "default value" in response:
+        login_data = [ remote_host, remote_port, elapsed_time, datetime.now() ]
+        login_log(login_data)   # Data is logged into a file
         print(Colors.GREEN + f"[!] Successful Telnet Session to [{remote_host}:{remote_port}]" + Colors.R)
         print(Colors.GREEN + "---------------------------------------------------------------------" + Colors.R)
         global_error = False
@@ -88,6 +91,13 @@ def telnet_auth_sequence(remote_host, remote_port, log_output=None, max_retries=
 
     # Final return
     return remote_socket
+
+# Take a list of login data and log it for further import into a database
+def login_log(login_data, log_file='new_logins.csv'):
+    with open(log_file, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(login_data)
+
 
 
 # This methods doesn't include a timeout, it waits for all the data to be received
