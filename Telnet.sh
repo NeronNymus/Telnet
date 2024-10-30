@@ -10,6 +10,7 @@
 #default_path="/home/$user/Bash/Telnet"
 #default_path="/home/$user/GitHub/Telnet"
 default_path=$(pwd)
+default_path="/mnt/Kali/home/grimaldi/Bash/Telnet"
 
 # Include function files
 for file in "$default_path/functions/"*/*; do
@@ -19,8 +20,7 @@ for file in "$default_path/functions/"*/*; do
 done
 
 # Global Variables
-
-
+TERM=xterm-256color
 PORT="23" # Default port
 RATE="1000"
 excluded_ranges="$default_path/scans/excluded_ranges"

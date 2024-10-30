@@ -71,8 +71,11 @@ analysis6(){
 
 # This function analyze the previous results
 analysis7(){
-	sed -i 's/pynet\/logs\///g; s/_log//g; s/:/,/; s/[[:space:]]\+/,/g; s/,\+/,/g; s/,$//; s/,SSID[0-9]\+//g' analysis/macs_dirty4.csv
+	#sed -i 's/pynet\/logs\///g; s/_log//g; s/:/,/; s/[[:space:]]\+/,/g; s/,\+/,/g; s/,$//; s/,SSID[0-9]\+//g' analysis/macs_dirty4.csv
 	#cat analysis/macs_dirty4 | parallel --pipe -j 16 sed 's/pynet\/logs\///g; s/_log//g; s/:/,/; s/[[:space:]]\+/,/g; s/,\+/,/g; s/,$//' | tee analysis/macs6.csv
+	#sed 's/pynet\/logs\///g; s/_log//g; s/:/,/; s/[[:space:]]\+/,/g; s/,\+/,/g; s/,$//; s/,SSID[0-9]\+//g' analysis/macs_dirty4.csv
+	cat analysis/macs_dirty4.csv
+	sed -i '/TXRATE/d' macs_dirty4.csv
 }
 
 #analysis1
@@ -81,4 +84,4 @@ analysis7(){
 #analysis4
 #analysis5
 #analysis6
-analysis7
+#analysis7
