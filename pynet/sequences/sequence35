@@ -1,0 +1,17 @@
+ip route
+display firewall rule
+firewall log
+undo firewall log
+add wifi filter
+del wifi filter
+display wifi filter
+display lan mac filter
+get ip conntrack
+display port statistics
+display sfwd port statistics
+netstat -na
+display pon statistics
+display poncnt
+display cpu info
+display memory info
+

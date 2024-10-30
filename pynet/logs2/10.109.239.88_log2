@@ -1,0 +1,321 @@
+ÿûÿûÿû
+Welcome Visiting Huawei Home Gateway
+Copyright by Huawei Technologies Co., Ltd.
+
+Login:root
+Password:
+Password is default value, please modify it!
+WAP>
+Last login: User:root IP:10.184.218.24 Time:2024-10-24 15:52:33
+ifconfig
+br0       Link encap:Ethernet  HWaddr E8:13:6E:01:2E:0C  
+          inet addr:192.168.100.1  Bcast:192.168.100.255  Mask:255.255.255.0
+          inet6 addr: fe80::1/64 Scope:Link
+          inet6 addr: fe80::ea13:6eff:fe01:2e0c/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:8999093 errors:0 dropped:233 overruns:0 frame:0
+          TX packets:12582173 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1225635978 (1.1 GiB)  TX bytes:2180605297 (2.0 GiB)
+
+eth0      Link encap:Ethernet  HWaddr E8:13:6E:01:2E:0C  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:646477313 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:161675068 errors:0 dropped:1297789 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:426950669 (407.1 MiB)  TX bytes:4225876289 (3.9 GiB)
+          Interrupt:119 
+
+gem1      Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:646475749 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:10798981 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:4261254054 (3.9 GiB)  TX bytes:1903889766 (1.7 GiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:3038137 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:3038137 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:557582415 (531.7 MiB)  TX bytes:557582415 (531.7 MiB)
+
+lo:0      Link encap:Local Loopback  
+          inet addr:169.254.254.162  Mask:255.255.255.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+
+mc_1_4095 Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+ppp257    Link encap:Point-to-Point Protocol  
+          inet addr:10.109.239.88  P-t-P:10.109.0.1  Mask:255.255.255.255
+          inet6 addr: 2806:2f0:42c0:0:8002:8fdb:2727:d6c2/128 Scope:Global
+          inet6 addr: fe80::d75:f692:58e:143d/128 Scope:Link
+          UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:1492  Metric:1
+          RX packets:494881 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:671528 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:3 
+          RX bytes:113176228 (107.9 MiB)  TX bytes:99623651 (95.0 MiB)
+
+ssid0     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:159458618 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:12508491 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:3773704664 (3.5 GiB)  TX bytes:2160337160 (2.0 GiB)
+
+ssid1     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:4730212 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:458788700 (437.5 MiB)
+
+ssid2     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:4730214 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:458788896 (437.5 MiB)
+
+ssid3     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:1 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:86 (86.0 B)
+
+ssid4     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:443716 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:4804271 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:139106215 (132.6 MiB)  TX bytes:479058709 (456.8 MiB)
+
+ssid7     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:2 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:172 (172.0 B)
+
+vap0      Link encap:Ethernet  HWaddr E8:13:6E:01:2E:14  
+          inet6 addr: fe80::ea13:6eff:fe01:2e14/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:159458618 errors:0 dropped:19417196 overruns:0 frame:0
+          TX packets:531143126 errors:0 dropped:5251040 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:38133443032 (35.5 GiB)  TX bytes:715519768235 (666.3 GiB)
+
+vap2      Link encap:Ethernet  HWaddr E8:13:6E:01:2E:16  
+          inet6 addr: fe80::ea13:6eff:fe01:2e16/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:4731081 errors:0 dropped:128 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:458826995 (437.5 MiB)
+
+vap4      Link encap:Ethernet  HWaddr E8:13:6E:01:2E:18  
+          inet6 addr: fe80::ea13:6eff:fe01:2e18/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:443716 errors:0 dropped:1848 overruns:0 frame:0
+          TX packets:6016411 errors:0 dropped:89419 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:139106215 (132.6 MiB)  TX bytes:1982490235 (1.8 GiB)
+
+vap6      Link encap:Ethernet  HWaddr E8:13:6E:01:2E:1A  
+          inet6 addr: fe80::ea13:6eff:fe01:2e1a/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:4731087 errors:0 dropped:129 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:458827447 (437.5 MiB)
+
+veth0     Link encap:Ethernet  HWaddr 5A:1A:66:7D:9C:88  
+          inet6 addr: fe80::581a:66ff:fe7d:9c88/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:1638482 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:1576053 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:340760332 (324.9 MiB)  TX bytes:119352445 (113.8 MiB)
+
+veth1     Link encap:Ethernet  HWaddr 5E:F4:03:DD:97:D6  
+          inet6 addr: fe80::5cf4:3ff:fedd:97d6/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:1576053 errors:0 dropped:4 overruns:0 frame:0
+          TX packets:1638482 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:119352445 (113.8 MiB)  TX bytes:340760332 (324.9 MiB)
+
+vnni1     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:3293971 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:891581846 (850.2 MiB)
+
+vnni2     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+vnni3     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+vnni4     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+vnni5     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+vuni1     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:60623008 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:3806464835 (3.5 GiB)
+
+vuni2     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+vuni3     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+vuni4     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+vuni5     Link encap:Ethernet  HWaddr 00:00:00:00:00:00  
+          UP BROADCAST RUNNING MULTICAST  MTU:2048  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+wan1      Link encap:Ethernet  HWaddr E8:13:6E:01:2E:0D  
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:8219308 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:10751255 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1970082112 (1.8 GiB)  TX bytes:1855179927 (1.7 GiB)
+
+wan2      Link encap:Ethernet  HWaddr E8:13:6E:01:2E:0E  
+          inet addr:10.202.14.168  Bcast:10.202.63.255  Mask:255.255.192.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:59148737 errors:0 dropped:236347 overruns:0 frame:0
+          TX packets:61020 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:2804507411 (2.6 GiB)  TX bytes:5905815 (5.6 MiB)
+
+wan3      Link encap:Ethernet  HWaddr E8:13:6E:01:2E:0F  
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:607724 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:358557160 (341.9 MiB)
+
+
+success!
+WAP>igmp enable
+success!
+WAP>display dns proxy info interface wan3
+ERROR::Interface is down
+
+WAP>ÿûÿûÿû
+Welcome Visiting Huawei Home Gateway
+Copyright by Huawei Technologies Co., Ltd.
+
+Login:root
+Password:
+Password is default value, please modify it!
+WAP>
+Last login: User:root IP:10.39.125.54 Time:2024-10-27 23:14:55
+display dns proxy info interface wan1
+-------------------------------------------------------------------------------------------------------------------------------------------
+Interface name               :wan1
+Stack                        :IPv4
+Vlan                         :400
+Timeout                      :10
+Retrytimes                   :2
+dynamic cache size           :0
+dynamic occupation ratio     :0.00%
+static entry size            :24
+static occupation ratio      :25.00%
+Server IP address                                 Priority       Type
+10.186.244.35                                     10             Dynamic
+8.8.8.8                                           10             Dynamic
+searchlist:--
+server1:10.186.244.35#53:queries sent:20567,answered:19947,no answer:529,error:5,timed out:86
+server2:8.8.8.8#53:queries sent:20567,answered:79,no answer:0,error:7,timed out:20481
+Host                                                             Address                                 Flags Expires
+bind                                                             8.8.8.8                                 FI   --
+localhost                                                        127.0.0.1                               4FIH  --
+localhost                                                        ::1                                     6FIH  --
+localhost.localdomain                                            ::1                                     6FIH  --
+localhost.localdomain                                            127.0.0.1                               4FIH  --
+localdomain                                                      127.0.0.1                               FIH  --
+-------------------------------------------------------------------------------------------------------------------------------------------
+Total:Dynamic 0,Static 6
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+Interface name               :wan1
+Stack                        :IPv6
+Vlan                         :400
+Timeout                      :10
+Retrytimes                   :2
+dynamic cache size           :0
+dynamic occupation ratio     :0.00%
+static entry size            :24
+static occupation ratio      :25.00%
+Server IP address                                 Priority       Type
+2806:2f0:41::13                                   5              Dynamic
+2001:4860:4860::8888                              5              Dynamic
+searchlist:--
+server1:2806:2f0:41::13#53:queries sent:36205,answered:35672,no answer:140,error:0,timed out:393
+server2:2001:4860:4860::8888#53:queries sent:36205,answered:390,no answer:3,error:0,timed out:35812
+Host                                                             Address                                 Flags Expires
+localhost.localdomain                                            ::1                                     6FIH  --
+localhost.localdomain                                            127.0.0.1                               4FIH  --
+bind                                                             127.0.0.1                               FI   --
+localdomain                                                      127.0.0.1                               FIH  --
+localhost                                                        127.0.0.1                               4FIH  --
+localhost                                                        ::1                                     6FIH  --
+-------------------------------------------------------------------------------------------------------------------------------------------
+Total:Dynamic 0,Static 6
+
+success!
+WAP>display dns proxy info interface wan3
+ERROR::Interface is down
+
+WAP>

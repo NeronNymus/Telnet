@@ -1,0 +1,40 @@
+ping
+traceroute
+arping
+netstat -na
+display dns proxy info
+display dhcp client
+display ip route
+display iptables filter
+nslookup
+display connection all
+display system info
+display cpu info
+display memory detail
+display syslog
+display version
+display log info
+display debug info
+display current-configuration
+show diagnose
+shell
+display wifi information
+display wifi filter
+display wifi radio
+set wifi filter
+set wifi para
+get wlan basic
+set wlan enable
+display port statistics
+sfwd port statistics
+display policy route all
+display flow
+display dynamic route
+display voip info
+display rtp stack channel stat
+display rtp stack chip stat
+display voip ring info
+display firewall rule
+set port isolate
+display aclservicesrule
+clear rogue flag

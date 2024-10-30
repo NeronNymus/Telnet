@@ -1,0 +1,6 @@
+igmp set iptv proxyenable 1
+igmp set iptv spresponsetime <value>
+igmp set iptv tosmark <value>
+igmp set iptv igmpversion <version_number>
+display dns proxy info interface <intfname>
+

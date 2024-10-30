@@ -1,7 +1,7 @@
 #!/bin/bash
 
 masscan_background(){
-
+	TERM=xterm-256color
 	threads="$1"
 	ranges="$2"
 	port_number="$3"
@@ -45,7 +45,7 @@ cat << EOF > "$excluded_path"
 127.0.0.0/8
 169.254.0.0/16
 #172.16.0.0/12
-192.168.0.0/16
+#192.168.0.0/16
 192.0.0.0/24
 192.0.2.0/24
 192.88.99.0/24

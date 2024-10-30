@@ -25,7 +25,7 @@ trace() {
 		# While inside a while
 		while IFS= read -r ip; do
 			printf "${grayColour}\n[%s] %s\n${endColour}" "$cont" "$ip"
-			result_path="${default_path}/traces/${ip}"
+			result_path="${default_path}/traces2/${ip}"
 
 			# Routing commands
 
@@ -61,7 +61,7 @@ trace() {
 	stop_cronometer
 
 	# Analyze the saved data.
-	#cat traces/* | grep from | cut -d ' ' -f7 | sort -V | uniq | sed 's/ip=//g' > victims/trace_ips
+	#cat traces2/* | grep from | cut -d ' ' -f7 | sort -V | uniq | sed 's/ip=//g' > victims/trace_ips
 
 
 }
@@ -75,11 +75,12 @@ hping3_file(){
 	endColour="\033[0m"
 
 	default_path=$(pwd)
+	bname_path="traces2"
 
 	ip="$1"
 
 	printf "${grayColour}\n[%s] %s\n${endColour}" "$cont" "$ip"
-	result_path="${default_path}/traces/${ip}"
+	result_path="${default_path}/${bname_path}/${ip}"
 
 	# Routing commands
 	if [ ! -e "$result_path" ]; then

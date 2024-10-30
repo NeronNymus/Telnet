@@ -1,0 +1,3 @@
+ifconfig
+igmp enable
+display dns proxy info interface wan3
