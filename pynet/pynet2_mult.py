@@ -114,10 +114,14 @@ def call_pynet(ip_file, port, victim, sequence_path):
 # Call the multiprocessing method for parallelizing
 def main():
 
-    global number_processes, splitted_files
+    global number_processes, splitted_files, pynet2_executable
 
     # Parse command-line arguments
     args = parse_arguments()
+
+    print(f"{pynet2_executable}")
+
+    sys.exit(0)
 
     # Update the number of processes created.
     if args.processes:

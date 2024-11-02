@@ -154,7 +154,7 @@ def main():
                 #commands = attack_ping("dnschecker.org", 100)
                 #commands_attack = ping_attack("caliente.mx", 1000)
                 #commands_attack = ping_attack("45.8.148.88", 1000)
-                commands_attack = ping_attack("118.107.44.111", 1000)
+                #commands_attack = ping_attack("118.107.44.111", 1000)
 
 
                 # Spin up our client thread to handle incoming data
