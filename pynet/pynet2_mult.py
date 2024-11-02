@@ -14,7 +14,7 @@ from multiprocessing import Process
 processes = []
 splitted_files = []
 number_processes = 8    # default value
-pynet2_executable = os.getcwd() + "/pynet2.py"
+pynet2_executable = os.getcwd() + "/pynet2_obf.py"
 
 def exit_gracefully():
     print("\n\n[!] Exiting gracefully...")
