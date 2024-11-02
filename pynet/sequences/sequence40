@@ -1,0 +1,3 @@
+display dhcp server user all
+ip neigh
+check security config
