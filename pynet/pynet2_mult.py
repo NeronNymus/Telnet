@@ -119,9 +119,9 @@ def main():
     # Parse command-line arguments
     args = parse_arguments()
 
-    print(f"{pynet2_executable}")
+    print(f"FLAG:\t{pynet2_executable}")
 
-    sys.exit(0)
+    #sys.exit(0)
 
     # Update the number of processes created.
     if args.processes:
