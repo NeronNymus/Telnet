@@ -141,6 +141,8 @@ def main():
         processes.append(p)
         p.start()
 
+    print(Colors.GREEN + f"\n[!] Command executes on {ip_file} begins with {number_processes} processes" + Colors.R)
+
     # Wait for all processes to complete
     for p in processes:
         p.join()
