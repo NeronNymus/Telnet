@@ -7,6 +7,7 @@ import os
 import sys
 import signal
 import argparse
+import subprocess
 import multiprocessing
 from multiprocessing import Process, Pool
 
@@ -14,7 +15,9 @@ from multiprocessing import Process, Pool
 processes = []
 splitted_files = []
 number_processes = 8    # default value
-pynet2_executable = os.getcwd() + "/pynet2_obf.py"
+#pynet2_executable = os.getcwd() + "/pynet2_obf.py"
+pynet2_executable = os.path.join(os.getcwd(), "pynet2_obf.py")
+
 
 def exit_gracefully():
     print("\n\n[!] Exiting gracefully...")
@@ -114,11 +117,17 @@ def split_file(input_path, number):
 def call_pynet(ip_file, port, victim, sequence_path):
     global pynet2_executable
     command = [
-        "python", pynet2_executable, "-iL", ip_file, "-p", str(port), "-l", "-v", victim, "-iC", sequence_path
+        "python", pynet2_executable, "-iL", ip_file, "-p", str(port), "-l", "-iC", sequence_path
     ]
+
+    print(f"Command: {command}")  # Before calling subprocess.run
+    if None in command:
+        print(f"Error: command contains None values: {command}")
+        return
+
     result = subprocess.run(command, capture_output=True, text=True)
-    if result.returncode != 0:
-        print(f"[!] Error running command for {ip_file}: {result.stderr}")
+    #if result.returncode != 0:
+    #    print(f"[!] Error running command for {ip_file}: {result.stderr}")
 
 
 # Call the multiprocessing method for parallelizing
@@ -129,7 +138,7 @@ def main():
     # Parse command-line arguments
     args = parse_arguments()
 
-    print(f"FLAG:\t{pynet2_executable}")
+    #print(f"FLAG:\t{pynet2_executable}")
 
     #sys.exit(0)
 
@@ -149,7 +158,10 @@ def main():
     # Split provided file
     split_file(args.ip_list, number_processes)
 
-    print()
+    #print()
+
+    signal.signal(signal.SIGINT, lambda sig, frame: signal_handler(sig, frame, processes))
+
     # Using a pool to parallelize `call_pynet`
     with Pool(processes=number_processes) as pool:
         pool.starmap(call_pynet, [(ip_file, args.port, args.victim, args.commands_list) for ip_file in splitted_files])
