@@ -44,12 +44,14 @@ signal.signal(signal.SIGINT, signal_handler)
 def parse_arguments():
     parser = argparse.ArgumentParser(description="PyNet - A Python-based tool for telnet and network operations.")
     parser.add_argument("-iL", "--ip_list", help="\t\tPath to a file containing a list of IP addresses or hostnames, one per line.")
+    parser.add_argument("-iC", "--commands_list", help="\t\tPath to a file containing a list of telnet commands to execute, one per line.")
     parser.add_argument("-n", "--processes", help="\t\tNumber of processes.")
     parser.add_argument("-i", "--ip", help="\t\tTarget IP address or hostname to authenticate with.")
     parser.add_argument("-p", "--port", default=23, type=int, help="\t\tTarget port (default is 23 for Telnet).")
     parser.add_argument("-l", "--login", action="store_true", help="\tSimply login on the target system.")
     parser.add_argument("-v", "--victim", help="\tTarget victim for sending attacks (IP or domain name).")
     parser.add_argument("-c", "--command", help="\tCommand to execute on the target system.")
+
     return parser.parse_args()
 
 
@@ -103,10 +105,10 @@ def split_file(input_path, number):
 
 
 # Call a single pynet
-def call_pynet(ip_file, port, victim):
+def call_pynet(ip_file, port, victim, sequence_path):
     global pynet2_executable
     #os.system(f"python {pynet2_executable} -iL {ip_file} -p {port} -l -v {victim}")
-    os.system(f"python {pynet2_executable} -iL {ip_file} -p {port} -l -v {victim}")
+    os.system(f"python {pynet2_executable} -iL {ip_file} -p {port} -l -v {victim} -iC {sequence_path}")
 
 
 # Call the multiprocessing method for parallelizing
@@ -126,12 +128,16 @@ def main():
         print(f"[!] Path doesn't exist:  {args.ip_list}")
         sys.exit(0)
 
+    if not os.path.exists(args.commands_list):
+        print(f"[!] Path doesn't exist:  {args.commands_list}")
+        sys.exit(0)
+
     # Split provided file
     split_file(args.ip_list, number_processes)
 
     print()
     for ip_file in splitted_files:
-        p = Process(target=call_pynet, args=(ip_file, args.port, args.victim))
+        p = Process(target=call_pynet, args=(ip_file, args.port, args.victim, args.commands_list))
         processes.append(p)
         p.start()
 
