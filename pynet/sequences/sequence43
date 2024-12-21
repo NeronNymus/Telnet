@@ -1,0 +1,5 @@
+display wifi neighbor
+display pppoe client interface wan1
+display bbsp log
+ip neigh
+netstat -na

@@ -1,0 +1,7 @@
+su
+ap list format 1 path /
+wap list format 1 path /
+wap list format 1 path /etc/wap/
+wap list format 1 path /etc/wap/hw_default_ctree.xml
+wap list format 1 path /mnt/jffs2/
+wap list format 1 path /mnt/jffs2/hw_ctree.xml

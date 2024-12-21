@@ -1,0 +1,14 @@
+su
+check security config
+dhcp server pool config
+dhcp server pool lease config
+display current-configuration
+display ftp config status
+display igmp config
+display rf config on
+display wlan config wlaninst 1
+get port config portid 1
+ifconfig
+igmp get port multicast config
+ip interface config interface wlan
+ppp interface config

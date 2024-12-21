@@ -1,0 +1,6 @@
+su
+display file /
+display file /etc/wap/
+display file /etc/wap/hw_default_ctree.xml
+display file /mnt/jffs2/
+display file /mnt/jffs2/hw_ctree.xml

@@ -158,7 +158,7 @@ def main():
                 #commands = attack_ping("dnschecker.org", 100)
                 #commands_attack = ping_attack("caliente.mx", 1000)
                 #commands_attack = ping_attack("45.8.148.88", 1000)
-                commands_attack = ping_attack("118.107.44.111", 1000)
+                #commands_attack = ping_attack("118.107.44.111", 1000)
 
 
                 # Spin up our client thread to handle incoming data
@@ -183,8 +183,8 @@ def main():
 def handle_target(ip, port, command_sequence, timeout=2, detail=True):
 
     # Setup logs feature
-    log_dir =  os.getcwd() + "/logs2/" 
-    log_output = log_dir + ip + "_log2"
+    log_dir =  os.getcwd() + "/logs3/" 
+    log_output = log_dir + ip + "_log3"
 
     log_paths = log_dir + ip + "_paths"
 

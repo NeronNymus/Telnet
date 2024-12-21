@@ -1,0 +1,8 @@
+nslookup domain google.com server 8.8.8.8
+nslookup domain google.com server 1.1.1.1
+display ddns info interface wan1
+display ddns info interface wan2
+display dns proxy info interface wan1
+display dns proxy info interface wan2
+display dnsserver static domain
+display poncnt dnstatistic

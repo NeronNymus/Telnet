@@ -1,0 +1,3 @@
+su
+ip -6 route
+ip route

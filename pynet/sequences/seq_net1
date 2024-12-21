@@ -1,0 +1,10 @@
+su
+ifconfig
+ip neigh
+ip route
+ip route show
+ip rule
+ip -6 neigh
+ip -6 route
+ip -6 rule
+netstat -na

@@ -28,7 +28,7 @@ global_error = False
 
 
 # Return a socket with the telnet session
-def telnet_auth_sequence(remote_host, remote_port, log_output=None, max_retries=5):
+def telnet_auth_sequence(remote_host, remote_port, log_output=None, max_retries=5, detail=True):
 
     global global_error
     global auth_timeout
@@ -54,7 +54,8 @@ def telnet_auth_sequence(remote_host, remote_port, log_output=None, max_retries=
 
     except Exception as e:
         global_error = True
-        #print(Colors.RED + f"[x] Error XYZ:\t\t{e}" + Colors.R)
+        if detail:
+            print(Colors.RED + f"[x] Error XYZ:\t\t{e}" + Colors.R)
         return
 
     # Execute login command sequence
@@ -79,15 +80,20 @@ def telnet_auth_sequence(remote_host, remote_port, log_output=None, max_retries=
     if "default value" in response:
         login_data = [ remote_host, remote_port, elapsed_time, datetime.now() ]
         login_log(login_data)   # Data is logged into a file
-        #print(Colors.GREEN + f"[!] Successful Telnet Session to [{remote_host}:{remote_port}]" + Colors.R)
-        #print(Colors.GREEN + "---------------------------------------------------------------------" + Colors.R)
+
+        if detail:
+            print(Colors.GREEN + f"[!] Successful Telnet Session to [{remote_host}:{remote_port}]" + Colors.R)
+            print(Colors.GREEN + "---------------------------------------------------------------------" + Colors.R)
         global_error = False
     else:
-        #print(Colors.RED + f"[x] Failed Telnet Session to [{remote_host}:{remote_port}]" + Colors.R)
+        if detail:
+            print(Colors.RED + f"[x] Failed Telnet Session to [{remote_host}:{remote_port}]" + Colors.R)
         global_error = True
+        return remote_socket
 
 
-    #print(Colors.ORANGE + f"[!] Elapsed time: {elapsed_time}" + Colors.R)
+    if detail:
+        print(Colors.ORANGE + f"[!] Elapsed time: {elapsed_time}" + Colors.R)
 
     # Final return
     return remote_socket
@@ -121,7 +127,8 @@ def socket_send_data(remote_socket, data, timeout=1, detail=False, max_retries=5
 
     global global_error
     if remote_socket is None or remote_socket.fileno() == -1:
-        #print("[!] Socket closed.")
+        if detail:
+            print("[!] Socket closed.")
         global_error = True
         return b''
     else:
@@ -143,24 +150,29 @@ def socket_send_data(remote_socket, data, timeout=1, detail=False, max_retries=5
     #    except:
     #        continue
 
-    #if detail == True:
-        #print(Colors.GREEN + "[<==] Received:" + Colors.R + f"\n{response}\n")
-        #print(Colors.GREEN + "---------------------------------------------------------------------" + Colors.R)
+    if detail == True:
+        print(Colors.GREEN + "[<==] Received:" + Colors.R + f"\n{response}\n")
+        print(Colors.GREEN + "---------------------------------------------------------------------" + Colors.R)
 
     return response
 
 
 # For sending list of commands. It is possible to save the output log
 # timeout works for each command in the provided commands list
-def socket_send_sequence(remote_socket, commands, timeout=1, detail=False, log_output=None, delay=2):
+def socket_send_sequence(remote_socket, commands, timeout=1, detail=True, log_output=None, delay=2):
     global global_error
 
-    cont = 1
+
     response = b''
+
+    if not remote_socket:
+        return response
+
+    cont = 1
     for command in commands:
         if detail and global_error is False:
             pass
-            #print(Colors.BOLD_WHITE + f"[{cont}] Sending this command:" + Colors.ORANGE + f"\n[==>] Sending:\n{command}\n" + Colors.R)
+            print(Colors.BOLD_WHITE + f"[{cont}] Sending this command:" + Colors.ORANGE + f"\n[==>] Sending:\n{command}\n" + Colors.R)
 
         # Send the data to remote socket
         if global_error is False:
@@ -177,9 +189,9 @@ def socket_send_sequence(remote_socket, commands, timeout=1, detail=False, log_o
             file.write(response)
             if log_output:
                 pass
-                #print(Colors.BOLD_WHITE + "[!] Logged output into:"+ Colors.ORANGE + f"\n{log_output}" + Colors.R)
-            if global_error == True:
-                #print(Colors.RED + "---------------------------------------------------------------------" + Colors.R)
+                print(Colors.BOLD_WHITE + "[!] Logged output into:"+ Colors.ORANGE + f"\n{log_output}" + Colors.R)
+            if global_error == True and detail:
+                print(Colors.RED + "---------------------------------------------------------------------" + Colors.R)
                 global_error = False # refresh the boolean
 
         # Close the file properly
@@ -194,17 +206,18 @@ def socket_send_sequence(remote_socket, commands, timeout=1, detail=False, log_o
 # Per example, executing a ping on the remote telnet
 def socket_send_command(remote_socket, command, detail=False):
     if detail:
-        #print(Colors.BOLD_WHITE + f"[!] Sending this command, no waiting response:" + Colors.ORANGE + f"\n{command}\n" + Colors.R)
+        print(Colors.BOLD_WHITE + f"[!] Sending this command, no waiting response:" + Colors.ORANGE + f"\n{command}\n" + Colors.R)
         pass
 
     if remote_socket is None or remote_socket.fileno() == -1:
-        #print("[!] Socket closed.")
+        print("[!] Socket closed.")
         pass
     else:
         remote_socket.sendall(command)
 
         # Doesn't wait for a response and maintain active the socket
-        #print(Colors.GREEN + "[!] Maintaining remote telnet session ACTIVE...." + Colors.R)
+        if detail:
+            print(Colors.GREEN + "[!] Maintaining remote telnet session ACTIVE...." + Colors.R)
         pass
         while remote_socket:
             time.sleep(1)
@@ -212,21 +225,21 @@ def socket_send_command(remote_socket, command, detail=False):
 
 # This method is for sending the command and waiting for the response
 # all the necessary time
-def socket_send_commands(remote_socket, commands, timeout, detail=False):    # There's not a timeout here
+def socket_send_commands(remote_socket, commands, timeout, detail=True):    # There's not a timeout here
 
     cont = 1
     response = b''
     for command in commands:
         if detail:
-            #print(Colors.BOLD_WHITE + f"[{cont}] Sending this command:" + Colors.ORANGE + f"\n{command}\n" + Colors.R)
+            print(Colors.BOLD_WHITE + f"[{cont}] Sending this command:" + Colors.ORANGE + f"\n{command}\n" + Colors.R)
             pass
         remote_socket.sendall(command)
 
         response = receive_from(remote_socket, timeout)
 
-        #if detail == True:
-            #print(Colors.GREEN + "[<==] Received:" + Colors.R + f"\n{response}\n")
-            #print(Colors.GREEN + "---------------------------------------------------------------------" + Colors.R)
+        if detail == True:
+            print(Colors.GREEN + "[<==] Received:" + Colors.R + f"\n{response}\n")
+            print(Colors.GREEN + "---------------------------------------------------------------------" + Colors.R)
 
         cont+=1
 

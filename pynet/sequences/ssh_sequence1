@@ -1,0 +1,2 @@
+display ssh authentication-type
+display ssh-hostkey fingerprint

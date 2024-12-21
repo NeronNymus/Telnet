@@ -16,7 +16,8 @@ processes = []
 splitted_files = []
 number_processes = 8    # default value
 #pynet2_executable = os.getcwd() + "/pynet2_obf.py"
-pynet2_executable = os.path.join(os.getcwd(), "pynet2_obf.py")
+#pynet2_executable = os.path.join(os.getcwd(), "pynet2_obf.py")
+pynet2_executable = os.path.join(os.getcwd(), "pynet2.py")
 
 
 def exit_gracefully():

@@ -1,0 +1,10 @@
+su
+set lanport qbuf ?
+set opticdata ?
+set cwmp debug ?
+set iaccess speed ?
+set voice announcement ?
+set voip sipprofile ?
+set wifi ap optimize ?
+set wlan basic ?
+set samba ?

@@ -341,7 +341,7 @@ commands_seq19 = [
 important_paths = [
     b'/',
     b'/etc/wap',
-    b'/etc/wawp/passwd',
+    b'/etc/wap/passwd',
 
 ]
 

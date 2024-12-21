@@ -54,3 +54,51 @@ def draw_graph2(G):
     plt.title('Directed IP Network Graph')
     plt.axis('off')  # Hide axis
     plt.show()
+
+# Graph increment
+def draw_graph3():
+    seconds = 5  # Delay between updates
+    graphed_path = "../logs2_history.csv"
+    
+    timestamps = []
+    active_hosts = []
+
+    plt.ion()  # Turn on interactive mode for live plotting
+    fig, ax = plt.subplots()
+    line, = ax.plot(timestamps, active_hosts, '-o', label="Active Hosts")
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Active Hosts")
+    ax.legend()
+    
+    start_time = time.time()
+
+    try:
+        with open(graphed_path) as file:
+            for number in file:
+                # Parse the data (assuming each line has a single number for active hosts)
+                active_host_count = int(number.strip())
+                elapsed_time = time.time() - start_time
+                
+                timestamps.append(elapsed_time)
+                active_hosts.append(active_host_count)
+
+                # Update the graph
+                line.set_xdata(timestamps)
+                line.set_ydata(active_hosts)
+                ax.relim()
+                ax.autoscale_view()
+
+                plt.draw()
+                plt.pause(0.01)  # Small pause for rendering
+                
+                time.sleep(seconds)  # Wait before processing the next line
+    except FileNotFoundError:
+        print(f"File not found: {graphed_path}")
+    except ValueError as e:
+        print(f"Invalid data in file: {e}")
+    finally:
+        plt.ioff()  # Turn off interactive mode
+        plt.show()
+
+if __name__ == "__main__":
+    draw_graph3()
