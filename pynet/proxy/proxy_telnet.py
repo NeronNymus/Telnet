@@ -373,7 +373,7 @@ def exec_ctrl_c(buffer):
 def list_help_commands():
     
     # Include hardcoded path for the commands
-    commands_path = "/home/grimaldi/Bash/Telnet/commands/commands.md"
+    commands_path = "/mnt/Kali/home/grimaldi/Bash/Telnet/commands/commands.md"
 
     # A list to store available commands
     available_commands = list()

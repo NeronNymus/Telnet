@@ -15,6 +15,7 @@ import threading
 
 # Personal packages
 from utils.colors import Colors
+from backend.backend import conn_simple
 from sockets.sconnection import telnet_auth_sequence, socket_send_data, socket_send_sequence, socket_send_command
 from parsing.wap_commands import pseudo_tree
 from commands.telnet_combinations import *
@@ -24,6 +25,9 @@ from commands.ping_combinations import ping_attack
 
 # Global variable to track remote sockets
 remote_sockets = []
+
+# Setup logs feature
+log_number = "5"
 
 def exit_gracefully():
     print("\n\n[!] Exiting gracefully...")
@@ -50,7 +54,9 @@ def parse_arguments():
     parser.add_argument("-iC", "--commands_list", help="\t\tPath to a file containing a list of telnet commands to execute, one per line.")
     parser.add_argument("-i", "--ip", help="\t\tTarget IP address or hostname to authenticate with.")
     parser.add_argument("-p", "--port", default=23, type=int, help="\t\tTarget port (default is 23 for Telnet).")
+    parser.add_argument("-g", "--log", default=4, type=int, help="\t\tLog number to save the logs.")
     parser.add_argument("-l", "--login", action="store_true", help="\tSimply login on the target system.")
+    parser.add_argument("-c", "--credentials", help="\tPass csv with username and password format for authentication")
     parser.add_argument("-v", "--victim", help="\tTarget victim for sending attacks (IP collection or domain name).")
     return parser.parse_args()
 
@@ -102,8 +108,13 @@ def main():
             #commands_seq = fuzz_proxy()
             
 
-            # Handle single session
-            handle_target(args.ip, args.port, commands_seq, 0.1, True) # Log executed commands with True
+            if args.credentials:
+                # Handle single session with provided credentials
+                handle_target(args.ip, args.port, commands_seq, 0.1, True, args.credentials) # Log executed commands with True flag
+
+            else:
+                # Handle single session with default credentials
+                handle_target(args.ip, args.port, commands_seq, 0.1, True) # Log executed commands with True flag
 
 
     # Option -iL is provided
@@ -180,11 +191,11 @@ def main():
 
 
 # Handle each victim
-def handle_target(ip, port, command_sequence, timeout=2, detail=True):
+def handle_target(ip, port, command_sequence, timeout=2, detail=True, credentials_path="/mnt/Kali/home/grimaldi/Bash/Telnet/pynet/credentials/default.csv"):
 
-    # Setup logs feature
-    log_dir =  os.getcwd() + "/logs3/" 
-    log_output = log_dir + ip + "_log3"
+    global log_number
+    log_dir =  os.getcwd() + f"/logs{log_number}/" 
+    log_output = log_dir + ip + f"_log{log_number}"
 
     log_paths = log_dir + ip + "_paths"
 
@@ -193,8 +204,8 @@ def handle_target(ip, port, command_sequence, timeout=2, detail=True):
         os.makedirs(log_dir, exist_ok=True)
 
     # Create and append socket session
-    remote_socket = telnet_auth_sequence(ip, port, log_output)      # log the auth sequence
-    #remote_socket = telnet_auth_sequence(ip, port)                 # don't log the auth sequence
+    remote_socket = telnet_auth_sequence(ip, port, credentials_path, log_output)      # log the auth sequence
+    #remote_socket = telnet_auth_sequence(ip, port, credentials_path)                 # don't log the auth sequence
     remote_sockets.append(remote_socket)
 
     # Send sequence of commands

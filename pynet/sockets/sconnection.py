@@ -13,6 +13,7 @@ from datetime import datetime
 # Personal packages
 from utils.colors import Colors
 from commands.telnet_combinations import auth_request2
+from backend.backend import telnet_process_ips
 
 auth_timeout = 1
 commands_timeout = 1
@@ -21,18 +22,31 @@ remote_sockets = list()
 EOF     = b'\x04'   # End of File  [004]
 ENTER   = b'\r\x00' # Enter Key    [013]
 
+# Default credentials
 username = b'root\r\n'
 password = b'adminHW\r\n'
 
 global_error = False
 
-
 # Return a socket with the telnet session
-def telnet_auth_sequence(remote_host, remote_port, log_output=None, max_retries=5, detail=True):
+def telnet_auth_sequence(remote_host, remote_port, credentials_path, log_output=None, max_retries=5, detail=True):
 
     global global_error
     global auth_timeout
     global commands_timeout
+    global username, password
+
+    # Import credentials distinct to defaults one when specified
+    if not credentials_path.endswith('default.csv'):
+        with open(credentials_path, 'r') as file:
+            for line in file:
+                items = line.split(',')
+                
+            username = items[0] + '\r\n'
+            password = items[1].rstrip() + '\r\n'
+            username = username.encode()
+            password = password.encode()
+
 
     # Record the start time before attempting the remote_socket
     start_time = datetime.now()
@@ -59,7 +73,7 @@ def telnet_auth_sequence(remote_host, remote_port, log_output=None, max_retries=
         return
 
     # Execute login command sequence
-    login_sequence = [username, password, ENTER]
+    #login_sequence = [username, password, ENTER]
     login_sequence = [username, password]
 
     # Another version for negotiation tries before login sequence
@@ -77,7 +91,7 @@ def telnet_auth_sequence(remote_host, remote_port, log_output=None, max_retries=
     if type(response) is bytes:
         response = response.decode('latin')
 
-    if "default value" in response:
+    if "Last login" in response:
         login_data = [ remote_host, remote_port, elapsed_time, datetime.now() ]
         login_log(login_data)   # Data is logged into a file
 
@@ -105,55 +119,97 @@ def login_log(login_data, log_file='new_logins.csv'):
         writer.writerow(login_data)
 
 
-
 # This methods doesn't include a timeout, it waits for all the data to be received
-def socket_receive_all(remote_socket, byte_size=4096):
+def socket_receive_all(remote_socket, byte_size=4096, end_marker=b"WAP>", timeout=5):
     buffer = b''
+    start_time = time.time()
+
     try:
-        # keep reading into the buffer until there's no more data or we timed out
         while True:
             data = remote_socket.recv(byte_size)
             if not data:
                 break
+
             buffer += data
-    except:
-        pass
+
+            # Check for end marker indicating the server finished its response
+            if end_marker in buffer:
+                break
+
+            # Reset the timeout if data is still being received
+            start_time = time.time()
+
+            # Break if no data has been received for the timeout duration
+            if time.time() - start_time > timeout:
+                break
+    except Exception as e:
+        pass  # Handle any exception if necessary (don't print in this case)
 
     return buffer
 
 
-# For sending single commands
-def socket_send_data(remote_socket, data, timeout=1, detail=False, max_retries=5):
-
+def socket_send_data(remote_socket, command, timeout=5, detail=False, max_retries=5):
     global global_error
+
     if remote_socket is None or remote_socket.fileno() == -1:
         if detail:
             print("[!] Socket closed.")
         global_error = True
         return b''
-    else:
-        for i in range(0, max_retries):
-            try:
-                remote_socket.sendall(data)
-                break
-            except:
-                continue
 
+    # Attempt to send the command
+    for _ in range(max_retries):
+        try:
+            remote_socket.sendall(command)
+            break
+        except Exception as e:
+            print(f"[!] Error sending command: {e}")
+            continue
 
-    response = socket_receive_all(remote_socket)
-    #response = b''
-    #for i in range(max_retries):
-    #    try:
-    #        response += remote_socket.recv(1024)
-    #        time.sleep(timeout) # Sleep time for receiving all the response
-    #        break
-    #    except:
-    #        continue
+    # Fetch remote IP address
+    remote_ip = None
+    try:
+        remote_ip = remote_socket.getpeername()[0]
+    except Exception as e:
+        print(f"[!] Error fetching remote IP: {e}")
 
-    if detail == True:
-        print(Colors.GREEN + "[<==] Received:" + Colors.R + f"\n{response}\n")
-        print(Colors.GREEN + "---------------------------------------------------------------------" + Colors.R)
+    # Define command-specific actions
+    decoded_command = command.rstrip().decode()
+    switch = {
+        "ip neigh": {
+            "expected_pattern": b"ip neigh",
+            "handler": lambda response: telnet_process_ips(response, remote_ip),  # Pass remote IP to handler
+        },
+    }
 
+    # Get the expected pattern and handler
+    action = switch.get(decoded_command, {})
+    expected_pattern = action.get("expected_pattern", None)
+    handler = action.get("handler", None)
+
+    # Initialize response variables
+    response = b''
+    start_time = time.time()
+
+    while True:
+        chunk = socket_receive_all(remote_socket, timeout=timeout)
+        response += chunk
+
+        # Check if the expected pattern is found and if the response ends with "WAP>"
+        if expected_pattern and expected_pattern in response and response.endswith(b"WAP>"):
+            if detail:
+                print(Colors.GREEN + "[*] Expected pattern detected for database import!" + Colors.R)
+            # Call the handler only when the response ends with "WAP>"
+            if handler:
+                handler(response)
+            break
+
+        # Timeout condition (no response received within timeout duration)
+        if time.time() - start_time > timeout:
+            break
+
+    # Log the response
+    print(response)
     return response
 
 

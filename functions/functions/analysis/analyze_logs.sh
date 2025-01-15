@@ -78,6 +78,14 @@ analysis7(){
 	sed -i '/TXRATE/d' macs_dirty4.csv
 }
 
+
+# This function analyze logs3 for routing IP's using 'ip route'
+analysis8(){
+	pwd
+	find pynet/logs3 -type f | wc -l
+	grep -ar 'via' pynet/logs3 | cut -d ' ' -f3 | sort -V | uniq | tee pynet/samples/forwarders
+}
+
 #analysis1
 #analysis2
 #analysis3
@@ -85,3 +93,4 @@ analysis7(){
 #analysis5
 #analysis6
 #analysis7
+#analysis8

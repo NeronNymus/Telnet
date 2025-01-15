@@ -1,0 +1,4 @@
+su
+display dhcp server user all
+display wifi neighbor
+ip neigh
