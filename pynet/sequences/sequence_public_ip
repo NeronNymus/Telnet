@@ -1,0 +1,6 @@
+ip route show
+netstat -na
+display ip interface
+route get default
+ifconfig
+

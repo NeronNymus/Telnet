@@ -12,12 +12,14 @@ import multiprocessing
 from multiprocessing import Process, Pool
 
 # Global list
+delay = 5
 processes = []
 splitted_files = []
 number_processes = 8    # default value
 #pynet2_executable = os.getcwd() + "/pynet2_obf.py"
 #pynet2_executable = os.path.join(os.getcwd(), "pynet2_obf.py")
-pynet2_executable = os.path.join(os.getcwd(), "pynet2.py")
+#pynet2_executable = os.path.join(os.getcwd(), "pynet2.py")
+pynet2_executable = os.path.abspath("pynet2.py")
 
 
 def exit_gracefully():
@@ -55,6 +57,7 @@ def parse_arguments():
     parser.add_argument("-l", "--login", action="store_true", help="\tSimply login on the target system.")
     parser.add_argument("-v", "--victim", help="\tTarget victim for sending attacks (IP or domain name).")
     parser.add_argument("-c", "--command", help="\tCommand to execute on the target system.")
+    parser.add_argument("-d", "--delay", help="\tDelay in seconds between listed hosts for performing connections.")
 
     return parser.parse_args()
 
@@ -117,37 +120,45 @@ def split_file(input_path, number):
 
 def call_pynet(ip_file, port, victim, sequence_path):
     global pynet2_executable
+    global delay
+
+
     command = [
-        "python", pynet2_executable, "-iL", ip_file, "-p", str(port), "-l", "-iC", sequence_path
+        #"python", pynet2_executable, "-iL", ip_file, "-p", str(port), "-l", "-iC", sequence_path, "--delay 3"
+        #"python", pynet2_executable, "-iL", ip_file, "-p", str(port), "-l", "-iC", sequence_path
+        sys.executable, pynet2_executable, "-iL", ip_file, "-p", str(port), "-l", "-iC", sequence_path
     ]
 
     print(f"Command: {command}")  # Before calling subprocess.run
     if None in command:
         print(f"Error: command contains None values: {command}")
         return
-
+    
+    print(f"[+] Launching: {' '.join(command)}")
     result = subprocess.run(command, capture_output=True, text=True)
-    #if result.returncode != 0:
-    #    print(f"[!] Error running command for {ip_file}: {result.stderr}")
+    
+    if result.returncode != 0:
+        print(f"[!] Error: {result.stderr}")
+    else:
+        print(f"[✓] Done: {ip_file}")
 
 
 # Call the multiprocessing method for parallelizing
-def main():
-
-    global number_processes, splitted_files, pynet2_executable
-
-    # Parse command-line arguments
+if __name__ == "__main__":
+    # Parse arguments once, only in parent process
     args = parse_arguments()
 
-    #print(f"FLAG:\t{pynet2_executable}")
+    # Store arguments somewhere safe
+    from functools import partial
+    import multiprocessing
 
-    #sys.exit(0)
-
-    # Update the number of processes created.
+    # Split files
     if args.processes:
         number_processes = int(args.processes)
 
-    # Check path exist
+    if args.delay:
+        delay = int(args.delay)
+
     if not os.path.exists(args.ip_list):
         print(f"[!] Path doesn't exist:  {args.ip_list}")
         sys.exit(0)
@@ -156,17 +167,18 @@ def main():
         print(f"[!] Path doesn't exist:  {args.commands_list}")
         sys.exit(0)
 
-    # Split provided file
     split_file(args.ip_list, number_processes)
 
-    #print()
-
-    signal.signal(signal.SIGINT, lambda sig, frame: signal_handler(sig, frame, processes))
-
-    # Using a pool to parallelize `call_pynet`
-    with Pool(processes=number_processes) as pool:
-        pool.starmap(call_pynet, [(ip_file, args.port, args.victim, args.commands_list) for ip_file in splitted_files])
-
+    # Setup multiprocessing pool safely
+    try:
+        with multiprocessing.get_context("fork").Pool(number_processes) as pool:
+            pool.starmap(
+                call_pynet,
+                [(ip_file, args.port, args.victim, args.commands_list) for ip_file in splitted_files]
+            )
+    except KeyboardInterrupt:
+        print("[!] Interrupted by user.")
+        exit_gracefully()
 
     #for ip_file in splitted_files:
     #    p = Process(target=call_pynet, args=(ip_file, args.port, args.victim, args.commands_list))
@@ -178,8 +190,3 @@ def main():
     # Wait for all processes to complete
     #for p in processes:
     #    p.join()
-
-
-
-if __name__ == "__main__":
-    main()

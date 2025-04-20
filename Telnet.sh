@@ -10,7 +10,7 @@
 #default_path="/home/$user/Bash/Telnet"
 #default_path="/home/$user/GitHub/Telnet"
 default_path=$(pwd)
-default_path="/mnt/Kali/home/grimaldi/Bash/Telnet"
+#default_path="/mnt/Kali/home/grimaldi/Bash/Telnet"
 
 # Include function files
 for file in "$default_path/functions/"*/*; do

