@@ -7,6 +7,7 @@ import os
 import sys
 import signal
 import argparse
+import platform
 import subprocess
 import multiprocessing
 from multiprocessing import Process, Pool
@@ -169,9 +170,15 @@ if __name__ == "__main__":
 
     split_file(args.ip_list, number_processes)
 
+    # Determine the correct context based on the OS
+    if platform.system() == "Windows":
+        mp_context = multiprocessing.get_context("spawn")
+    else:
+        mp_context = multiprocessing.get_context("fork")
+
     # Setup multiprocessing pool safely
     try:
-        with multiprocessing.get_context("fork").Pool(number_processes) as pool:
+        with mp_context.Pool(number_processes) as pool:
             pool.starmap(
                 call_pynet,
                 [(ip_file, args.port, args.victim, args.commands_list) for ip_file in splitted_files]
