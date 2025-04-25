@@ -62,37 +62,38 @@ void split_file(const char *input_path, int number) {
     free(ip_addresses);
 }
 
-void call_pynet(const char *ip_file, const char *port, const char *commands_list) {
-    pid_t pid = _spawnvp(_P_NOWAIT, "python", (char *[]) {
+void call_pynet(const char *python_script_path, const char *ip_file, const char *port, const char *commands_list) {
+    char *args[] = {
         "python",
-        "C:\\Path\\To\\pynet\\run_pynet2.py",
+        (char *)python_script_path,
         "-iL", (char *)ip_file,
         "-p", (char *)port,
         "-l",
         "-iC", (char *)commands_list,
         NULL
-    });
+    };
+
+    pid_t pid = _spawnvp(_P_NOWAIT, "python", args);
 
     if (pid == -1) {
         perror("spawnvp");
         exit(1);
-    } else {
-        child_pids[child_count++] = pid;
     }
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 9) {
-        fprintf(stderr, "Usage: %s -iL <ip_list> -iC <commands_list> -n <processes> [-p <port>]\n", argv[0]);
+    if (argc < 8) {
+        fprintf(stderr, "Usage: %s <pynet2.py> -iL <ip_list> -iC <commands_list> -n <processes> [-p <port>]\n", argv[0]);
         return 1;
     }
 
+    char *pynet2_path = argv[1];
     char *ip_list = NULL;
     char *commands_list = NULL;
     char *processes_arg = NULL;
     char *port = "23";
 
-    for (int i = 1; i < argc; i++) {
+    for (int i = 2; i < argc; i++) {
         if (strcmp(argv[i], "-iL") == 0) ip_list = argv[++i];
         else if (strcmp(argv[i], "-iC") == 0) commands_list = argv[++i];
         else if (strcmp(argv[i], "-n") == 0) processes_arg = argv[++i];
@@ -113,13 +114,7 @@ int main(int argc, char *argv[]) {
     split_file(ip_list, num_processes);
 
     for (int i = 0; i < split_count; i++) {
-        call_pynet(splitted_files[i], port, commands_list);
-    }
-
-    for (int i = 0; i < child_count; i++) {
-        WaitForSingleObject(processes[i].hProcess, INFINITE);
-        CloseHandle(processes[i].hProcess);
-        CloseHandle(processes[i].hThread);
+        call_pynet(pynet2_path, splitted_files[i], port, commands_list);
     }
 
     for (int i = 0; i < split_count; i++) {
