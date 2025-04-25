@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <windows.h>
-#include <process.h>
-
-// This script target Windows as platform.
+#include <time.h>
 
 #define MAX_LINE_LENGTH 1024
 #define MAX_SPLITS 10000
@@ -27,7 +25,7 @@ void split_file(const char *input_path, int number) {
 
     while (fgets(line, sizeof(line), file)) {
         ip_addresses = realloc(ip_addresses, sizeof(char*) * (total_lines + 1));
-        ip_addresses[total_lines] = _strdup(line);  // Windows-safe strdup
+        ip_addresses[total_lines] = _strdup(line);
         total_lines++;
     }
     fclose(file);
@@ -59,26 +57,28 @@ void split_file(const char *input_path, int number) {
         splitted_files[split_count++] = out_path;
         printf("[!] Splitted: %s     %d\n", out_path, current_chunk_size);
     }
+
     free(ip_addresses);
 }
 
 void call_pynet(const char *python_script_path, const char *ip_file, const char *port, const char *commands_list) {
-    char *args[] = {
-        "python",
-        (char *)python_script_path,
-        "-iL", (char *)ip_file,
-        "-p", (char *)port,
-        "-l",
-        "-iC", (char *)commands_list,
-        NULL
-    };
+    char cmd[1024];
+    snprintf(cmd, sizeof(cmd),
+             "python \"%s\" -iL \"%s\" -p \"%s\" -l -iC \"%s\"",
+             python_script_path, ip_file, port, commands_list);
 
-    pid_t pid = _spawnvp(_P_NOWAIT, "python", args);
+    STARTUPINFOA si = {0};
+    PROCESS_INFORMATION pi = {0};
+    si.cb = sizeof(si);
 
-    if (pid == -1) {
-        perror("spawnvp");
-        exit(1);
+    if (!CreateProcessA(
+            NULL, cmd, NULL, NULL, FALSE,
+            CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
+        fprintf(stderr, "Failed to start process: %s\n", cmd);
+        return;
     }
+
+    processes[child_count++] = pi;
 }
 
 int main(int argc, char *argv[]) {
@@ -115,6 +115,12 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < split_count; i++) {
         call_pynet(pynet2_path, splitted_files[i], port, commands_list);
+    }
+
+    for (int i = 0; i < child_count; i++) {
+        WaitForSingleObject(processes[i].hProcess, INFINITE);
+        CloseHandle(processes[i].hProcess);
+        CloseHandle(processes[i].hThread);
     }
 
     for (int i = 0; i < split_count; i++) {
