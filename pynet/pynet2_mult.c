@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <time.h>
 
 #define MAX_LINE_LENGTH 1024
 #define MAX_SPLITS 10000
@@ -41,6 +42,17 @@ void split_file(const char *input_path, int number) {
         total_lines++;
     }
     fclose(file);
+
+    // Seed random generator
+    srand(time(NULL));
+
+    // Fisher-Yates shuffle
+    for (int i = total_lines - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        char *temp = ip_addresses[i];
+        ip_addresses[i] = ip_addresses[j];
+        ip_addresses[j] = temp;
+    }
 
     int chunk_size = total_lines / number;
     int remainder = total_lines % number;

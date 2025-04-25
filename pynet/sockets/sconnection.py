@@ -3,7 +3,7 @@
 # This script perform telnet remote_sockets using socket instead of telnetlib.
 # The intention is to execute command sequences quickly.
 # Save, process and analyze logs output for creation of more command sequences.
-# There exist a backend storing the results of command sequences executed.
+# There exist a backend storing the results of executed command sequences.
 
 import sys
 import csv
@@ -97,7 +97,8 @@ def telnet_auth_sequence(remote_host, remote_port, credentials_path, log_output=
     if type(response) is bytes:
         response = response.decode('latin')
 
-    if "Last login" in response:
+    #if "Last login" in response:
+    if "Password is default value" in response:
         login_data = [remote_host, elapsed_time, datetime.now(), True]
         login_log(login_data)   # Data is logged into a csv file and database
 
@@ -192,7 +193,7 @@ def socket_send_data(remote_ip, remote_socket, command, timeout=5, detail=False,
         },
         "EGflFhmzQUnTc8gJlku/": {
             "expected_pattern": b"Password of root has been modified successfully",
-            "handler": lambda response: update_telnet_pass(response, remote_ip)
+            "handler": lambda response: update_telnet_pass(response, remote_ip, 'changed_telnet_pass.csv')
         },
     }
 

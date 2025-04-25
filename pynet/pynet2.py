@@ -27,7 +27,7 @@ from commands.ping_combinations import ping_attack
 remote_sockets = []
 
 # Setup logs feature
-log_number = "6"
+log_number = "10"
 
 def exit_gracefully():
     print("\n\n[!] Exiting gracefully...")
@@ -182,7 +182,8 @@ def main():
                 #target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, True))
                 try:
                     target_handler.start()
-                    time.sleep(5)
+                    #time.sleep(5)
+                    time.sleep(0.5)
                 except:
                     continue
 
