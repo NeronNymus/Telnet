@@ -29,6 +29,7 @@ remote_sockets = []
 # Setup logs feature
 log_number = "10"
 credentials_path = "credentials/default.csv"
+credentials_path = "credentials/new.csv"
 
 def exit_gracefully():
     print("\n\n[!] Exiting gracefully...")
@@ -193,11 +194,11 @@ def main():
                 #time.sleep(delay)
 
                 # Delay between host login
-                #if args.delay:
-                #    delay_between_ips = int(args.delay)
-                #    time.sleep(delay_between_ips)
-                #else:
-                #    time.sleep(1)
+                if args.delay:
+                    delay_between_ips = int(args.delay)
+                    time.sleep(delay_between_ips)
+                else:
+                    time.sleep(0.5)
 
             #ip_cont += 1
 

@@ -27,6 +27,7 @@ ENTER   = b'\r\x00' # Enter Key    [013]
 # Default credentials
 username = b'root\r\n'
 password = b'adminHW\r\n'
+password = "EGflFhmzQUnTc8gJlku/".encode()
 
 global_error = False
 
