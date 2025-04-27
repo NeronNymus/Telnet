@@ -174,33 +174,36 @@ def insert_devices(devices, conn):
 
 
 # Take a list of login data and log it and import into a database
-def login_log(login_data, log_file='new_logins/new_logins10.csv'):
+def login_log(login_data, log_number=10, insert_db=True):
 
+    log_file = f"new_logins/new_logins{log_number}.csv"
+    
     # Log the data to the CSV file
     with open(log_file, mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(login_data)
 
     # Insert the data into the database
-    conn = conn_simple()
-    if conn:
-        try:
-            with conn.cursor() as cur:
-                insert_query = sql.SQL("""
-                    INSERT INTO login_registry (ipv4_address, response_time, timestamp, success)
-                    VALUES (%s, %s, %s, %s)
-                """)
-                cur.execute(insert_query, login_data)
-                conn.commit()
-                print(f"{Colors.GREEN}[+] Login data inserted into database:{Colors.R}\n{login_data}")
-        except Exception as e:
-            print(f"{Colors.RED}[-] Failed to insert data into database:{Colors.R} {e}")
-            conn.rollback()
-        finally:
-            #print(f"{Colors.GREEN}[!] Closing connection to the database.{Colors.R}")
-            conn.close()
-    else:
-        print(f"{Colors.RED}[-] Could not connect to the database.{Colors.R}")
+    if insert_db:
+        conn = conn_simple()
+        if conn:
+            try:
+                with conn.cursor() as cur:
+                    insert_query = sql.SQL("""
+                        INSERT INTO login_registry (ipv4_address, response_time, timestamp, success)
+                        VALUES (%s, %s, %s, %s)
+                    """)
+                    cur.execute(insert_query, login_data)
+                    conn.commit()
+                    print(f"{Colors.GREEN}[+] Login data inserted into database:{Colors.R}\n{login_data}")
+            except Exception as e:
+                print(f"{Colors.RED}[-] Failed to insert data into database:{Colors.R} {e}")
+                conn.rollback()
+            finally:
+                #print(f"{Colors.GREEN}[!] Closing connection to the database.{Colors.R}")
+                conn.close()
+        else:
+            print(f"{Colors.RED}[-] Could not connect to the database.{Colors.R}")
 
 
 def import_login_logs(log_file='new_logins.csv', chunk_size=500):
@@ -468,7 +471,9 @@ def process_public_ips(received_data, remote_ip):
 
 
 # Register the updated telnet password
-def update_telnet_pass(response, remote_ip, log_file='changed_telnet_pass.csv'):
+def update_telnet_pass(response, remote_ip, log_number):
+
+    log_file = f"changed_telnet_pass{log_number}.csv"
 
     password = 'EGflFhmzQUnTc8gJlku/'  # fixed password in your query
     timestamp = datetime.date.today()

