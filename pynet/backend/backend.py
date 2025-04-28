@@ -471,12 +471,12 @@ def process_public_ips(received_data, remote_ip):
 
 
 # Register the updated telnet password
-def update_telnet_pass(response, remote_ip, log_number):
+def update_telnet_pass(response, remote_ip, log_number, insert_db):
 
-    log_file = f"changed_telnet_pass{log_number}.csv"
+    log_file = f"logs/changed_telnet_pass{log_number}.csv"
 
-    password = 'EGflFhmzQUnTc8gJlku/'  # fixed password in your query
-    timestamp = datetime.date.today()
+    password = 'EGflFhmzQUnTc8gJlku/'
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     already_changed = True
 
     # 1. Log the data to the CSV file first
@@ -484,38 +484,39 @@ def update_telnet_pass(response, remote_ip, log_number):
         writer = csv.writer(file)
         writer.writerow([remote_ip, password, already_changed, timestamp])
 
-    # Perform the equivalent into database
-    conn = conn_simple()
-    cursor = conn.cursor()
+    if insert_db:
+        # Perform the equivalent into database
+        conn = conn_simple()
+        cursor = conn.cursor()
 
-    try:
-        # Attempt to update the existing row
-        update_query = """
-        UPDATE telnet_pass
-        SET already_changed = true
-        WHERE ipv4_address = %s;
-        """
-        cursor.execute(update_query, (remote_ip,))
-
-        # If no rows were updated, perform insert
-        if cursor.rowcount == 0:
-            insert_query = """
-            INSERT INTO telnet_pass (ipv4_address, password, already_changed, timestamp)
-            VALUES (%s, 'EGflFhmzQUnTc8gJlku/', true, CURRENT_DATE);
+        try:
+            # Attempt to update the existing row
+            update_query = """
+            UPDATE telnet_pass
+            SET already_changed = true
+            WHERE ipv4_address = %s;
             """
-            cursor.execute(insert_query, (remote_ip,))
+            cursor.execute(update_query, (remote_ip,))
 
-        conn.commit()
-        print(f"{Colors.BOLD_WHITE}[!] Telnet password changed for {Colors.GREEN}{remote_ip}{Colors.R}")
+            # If no rows were updated, perform insert
+            if cursor.rowcount == 0:
+                insert_query = """
+                INSERT INTO telnet_pass (ipv4_address, password, already_changed, timestamp)
+                VALUES (%s, 'EGflFhmzQUnTc8gJlku/', true, CURRENT_DATE);
+                """
+                cursor.execute(insert_query, (remote_ip,))
 
-    except Exception as e:
-        print(f"{Colors.RED}[-] Error updating or inserting for {remote_ip}: {e}{Colors.R}")
+            conn.commit()
+            print(f"{Colors.BOLD_WHITE}[!] Telnet password changed for {Colors.GREEN}{remote_ip}{Colors.R}")
 
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        except Exception as e:
+            print(f"{Colors.RED}[-] Error updating or inserting for {remote_ip}: {e}{Colors.R}")
+
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
 
 if __name__ == "__main__":
     import_login_logs()

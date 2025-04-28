@@ -80,14 +80,14 @@ void split_file(const char *input_path, int number) {
 }
 
 // Function to call pynet2.py with appropriate arguments
-void call_pynet(const char *ip_file, const char *port, const char *commands_list) {
+void call_pynet(const char *ip_file, const char *port, const char *commands_list, const char *g_value, const char *d_value) {
     pid_t pid = fork();
     if (pid == 0) {
         // Child process
 
         // Print the command to be executed
-        printf("Executing: run_pynet2.sh -iL %s -p %s -l -iC %s\n", ip_file, port, commands_list);
-        fflush(stdout); // Ensure it's printed before redirection
+        printf("Executing: run_pynet2.sh -iL %s -p %s -l -iC %s -g %s -d %s\n", ip_file, port, commands_list, g_value, d_value);
+        fflush(stdout);
 
         // Redirect stdout and stderr to /dev/null
         int devnull = open("/dev/null", O_WRONLY);
@@ -98,7 +98,7 @@ void call_pynet(const char *ip_file, const char *port, const char *commands_list
         }
 
         execlp("/media/Kali/home/grimaldi/Bash/Telnet/pynet/run_pynet2.sh",
-               "run_pynet2.sh", "-iL", ip_file, "-p", port, "-l", "-iC", commands_list,
+               "run_pynet2.sh", "-iL", ip_file, "-p", port, "-l", "-iC", commands_list, "-g", g_value, "-d", d_value,
                (char *)NULL);
 
         // Only reached if execlp fails
@@ -115,8 +115,8 @@ void call_pynet(const char *ip_file, const char *port, const char *commands_list
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 9) {
-        fprintf(stderr, "Usage: %s -iL <ip_list> -iC <commands_list> -n <processes> [-p <port>]\n", argv[0]);
+    if (argc < 13) {
+        fprintf(stderr, "Usage: %s -iL <ip_list> -iC <commands_list> -n <processes> -g <group_size> -d <depth> [-p <port>]\n", argv[0]);
         exit(1);
     }
 
@@ -124,6 +124,8 @@ int main(int argc, char *argv[]) {
     char *commands_list = NULL;
     char *processes = NULL;
     char *port = "23"; // Default port
+    char *g_value = NULL;
+    char *d_value = NULL;
 
     // Parse command-line arguments
     for (int i = 1; i < argc; i++) {
@@ -133,12 +135,16 @@ int main(int argc, char *argv[]) {
             commands_list = argv[++i];
         } else if (strcmp(argv[i], "-n") == 0 && i + 1 < argc) {
             processes = argv[++i];
+        } else if (strcmp(argv[i], "-g") == 0 && i + 1 < argc) {
+            g_value = argv[++i];
+        } else if (strcmp(argv[i], "-d") == 0 && i + 1 < argc) {
+            d_value = argv[++i];
         } else if (strcmp(argv[i], "-p") == 0 && i + 1 < argc) {
             port = argv[++i];
         }
     }
 
-    if (!ip_list || !commands_list || !processes) {
+    if (!ip_list || !commands_list || !processes || !g_value || !d_value) {
         fprintf(stderr, "Missing required arguments.\n");
         exit(1);
     }
@@ -157,7 +163,7 @@ int main(int argc, char *argv[]) {
 
     // Fork child processes to call pynet2.py
     for (int i = 0; i < split_count; i++) {
-        call_pynet(splitted_files[i], port, commands_list);
+        call_pynet(splitted_files[i], port, commands_list, g_value, d_value);
     }
 
     // Wait for all child processes to finish

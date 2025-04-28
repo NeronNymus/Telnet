@@ -30,6 +30,7 @@ remote_sockets = []
 log_number = "10"
 credentials_path = "credentials/default.csv"
 credentials_path = "credentials/new.csv"
+credentials_path = "credentials/various.csv"
 
 def exit_gracefully():
     print("\n\n[!] Exiting gracefully...")
@@ -76,8 +77,6 @@ def find_mac_addresses(file_path):
     
     # Join tuples into full MAC address strings
     return ["".join(mac) for mac in mac_addresses]
-
-
 
 
 # Main method
@@ -180,20 +179,15 @@ def main():
 
 
                 # Spin up our client thread to handle incoming data
-                target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, False, credentials_path))
-                #target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, True, credentials_path))
+                #target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, False, credentials_path))
+                target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, True, credentials_path))
                 try:
                     target_handler.start()
-                    #time.sleep(5)
-                    time.sleep(0.5)
+                    #target_handler.join()
                 except:
                     continue
 
                 # Delay time between threads
-                #delay = 1
-                #time.sleep(delay)
-
-                # Delay between host login
                 if args.delay:
                     delay_between_ips = int(args.delay)
                     time.sleep(delay_between_ips)

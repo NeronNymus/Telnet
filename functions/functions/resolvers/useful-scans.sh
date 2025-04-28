@@ -84,35 +84,45 @@ EOF
 	mass_log=$(basename "$output_path")
 
 
+	printf "\n${grayColour}[!] Executed command:\n${endColour}"
+	echo -e "\nsudo masscan -c $conf -oG $output_path | tee ${logs_path}/${mass_log}.log 2>${logs_path}/${mass_log}_errors.log"
+	echo
 
-	if [ "$threads" = '1/1' ]; then
-		printf "\n${grayColour}[!] Executed command:\n${endColour}"
-		echo -e "\nsudo masscan -c $conf -oG $output_path | tee ${logs_path}/${mass_log}.log 2>${logs_path}/${mass_log}_errors.log"
-		echo
+	printf "\n${grayColour}[!] Configuration file: %s\n${endColour}" "$conf"
+	cat "$conf"
+	echo
 
-		printf "\n${grayColour}[!] Configuration file: %s\n${endColour}" "$conf"
-		cat "$conf"
-		echo
+	printf "\n${grayColour}[!] Running masscan on port $port_number in the background:${endColour}\n\n"
+	sudo masscan -c "$conf" -oG "$output_path" | tee "${logs_path}/${mass_log}.log" 2>"${logs_path}/${mass_log}_errors.log"
 
-		printf "\n${grayColour}[!] Running masscan on port $port_number in the background:${endColour}\n\n"
-		sudo masscan -c "$conf" -oG "$output_path" | tee "${logs_path}/${mass_log}.log" 2>"${logs_path}/${mass_log}_errors.log"
-	else
-		printf "\n${grayColour}[!] Configuration file: %s${endColour}\n" "$conf"
-		cat "$conf"
-		printf "\n\n${grayColour}[!] Commands executed in parallel:${endColour}\n"
 
-		numerator=$(echo "$threads" | cut -d '/' -f1)
-		denominator=$(echo "$threads" | cut -d '/' -f2)
-		output_path="${output_path}_${numerator}_${denominator}"
-
-		#echo -e "\nsudo masscan -c $conf --shard $threads -oG ${output_path} 1>${logs_path}/${mass_log}.log 2>${logs_path}/${mass_log}_errors.log"
-		echo -e "\nsudo masscan -c $conf --shard $threads -oG ${output_path}"
-
-		touch "${output_path}_${numerator}_${denominator}"
-		echo
-		sudo masscan -c "$conf" --shard "$threads" -oG "${output_path}"
-
-	fi
+#	if [ "$threads" = '1/1' ]; then
+#		printf "\n${grayColour}[!] Executed command:\n${endColour}"
+#		echo -e "\nsudo masscan -c $conf -oG $output_path | tee ${logs_path}/${mass_log}.log 2>${logs_path}/${mass_log}_errors.log"
+#		echo
+#
+#		printf "\n${grayColour}[!] Configuration file: %s\n${endColour}" "$conf"
+#		cat "$conf"
+#		echo
+#
+#		printf "\n${grayColour}[!] Running masscan on port $port_number in the background:${endColour}\n\n"
+#		sudo masscan -c "$conf" -oG "$output_path" | tee "${logs_path}/${mass_log}.log" 2>"${logs_path}/${mass_log}_errors.log"
+#	else
+#		printf "\n${grayColour}[!] Configuration file: %s${endColour}\n" "$conf"
+#		cat "$conf"
+#		printf "\n\n${grayColour}[!] Commands executed in parallel:${endColour}\n"
+#
+#		numerator=$(echo "$threads" | cut -d '/' -f1)
+#		denominator=$(echo "$threads" | cut -d '/' -f2)
+#		output_path="${output_path}_${numerator}_${denominator}"
+#
+#		#echo -e "\nsudo masscan -c $conf --shard $threads -oG ${output_path} 1>${logs_path}/${mass_log}.log 2>${logs_path}/${mass_log}_errors.log"
+#		echo -e "\nsudo masscan -c $conf --shard $threads -oG ${output_path}"
+#
+#		touch "${output_path}_${numerator}_${denominator}"
+#		echo
+#		sudo masscan -c "$conf" --shard "$threads" -oG "${output_path}"
+#	fi
 
 	printf "\n${grayColour}[!] Waiting the masscan jobs to finish...${endColour}"
 	wait
