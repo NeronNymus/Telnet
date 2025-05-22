@@ -183,7 +183,7 @@ def main():
                 target_handler = threading.Thread(target=handle_target, args=(ip, args.port, commands_seq, 0.1, True, credentials_path))
                 try:
                     target_handler.start()
-                    #target_handler.join()
+                    target_handler.join()
                 except:
                     continue
 
